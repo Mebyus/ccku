@@ -1,0 +1,13 @@
+BasedOnStyle: LLVM
+UseTab: Never
+IndentWidth: 4
+ContinuationIndentWidth: 4
+ColumnLimit: 120
+InsertTrailingCommas: Wrapped
+MaxEmptyLinesToKeep: 2
+AlignAfterOpenBracket: DontAlign
+BinPackArguments: false
+BinPackParameters: false
+AlignConsecutiveAssignments: Consecutive
+AlignTrailingComments: true
+AllowShortFunctionsOnASingleLine: Empty

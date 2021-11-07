@@ -1,0 +1,12 @@
+
+
+
+   fn add(a, b i32) i32 {  
+    return a + b
+}  
+
+fn print_sum_with_2 (a i32){
+        print(add(a, 2))
+        a = 0x5f1d
+   }
+  
