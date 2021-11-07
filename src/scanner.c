@@ -363,6 +363,27 @@ Token scan_line_comment(Scanner *s) {
     return token;
 }
 
+Token scan_character_literal(Scanner *s) {
+    uint64_t start_pos = s->pos - 1;
+
+    Token token = {
+        .line   = s->line,
+        .column = s->column - 1,
+    };
+
+    int code;
+    do {
+        code = advance(s);
+    } while (code != text_eof && code != '\'');
+
+    uint64_t end_pos = s->pos;
+    str literal      = new_str_slice(s->text, start_pos, end_pos);
+    token.literal    = literal;
+    token.type       = tt_Character;
+
+    return token;
+}
+
 Token scan_other(Scanner *s) {
     Token token;
 
@@ -446,9 +467,6 @@ Token scan_next_token(Scanner *s) {
     if (is_whitespace((uint8_t)code)) {
         code = skip_whitespace(s);
         if (code == text_eof) {
-            // skip_whitespace() returns whitespace only if EOF was reached.
-            // Advance scanner before we return EOF token, so that next peek()
-            // returns EOF
             token = create_token(s->line, s->column, tt_EOF);
             return token;
         }
@@ -478,6 +496,11 @@ Token scan_next_token(Scanner *s) {
             token = scan_line_comment(s);
             return token;
         }
+    }
+
+    if (b == '\'') {
+        token = scan_character_literal(s);
+        return token;
     }
 
     token = scan_other(s);
