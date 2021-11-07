@@ -314,9 +314,19 @@ Token scan_string_literal(Scanner *s) {
     };
 
     int code;
+    bool escaped    = false;
+    bool skip_qoute;
     do {
+        skip_qoute = false;
+
         code = advance(s);
-    } while (code != text_eof && code != '"');
+        if (!escaped && code == '\\') {
+            escaped = true;
+        } else if (escaped) {
+            escaped    = false;
+            skip_qoute = true;
+        }
+    } while (code != text_eof && (skip_qoute || code != '"'));
 
     uint64_t end_pos = s->pos;
     str literal      = new_str_slice(s->text, start_pos, end_pos);
