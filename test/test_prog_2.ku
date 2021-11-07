@@ -1,9 +1,15 @@
 s := 0
 
 i := 0
-while (i < 14) loop {
+while i < 14 loop {
     s += i
     i++
 }
 
 println(s)
+
+if s > 20 {
+    var s2 str = "string"
+    s = s + s2[3]
+}
+

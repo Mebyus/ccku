@@ -314,7 +314,7 @@ Token scan_string_literal(Scanner *s) {
     };
 
     int code;
-    bool escaped    = false;
+    bool escaped = false;
     bool skip_qoute;
     do {
         skip_qoute = false;
@@ -377,11 +377,50 @@ Token scan_other(Scanner *s) {
     case '}':
         token = create_token(s->line, column_start, tt_RightCurlyBracket);
         break;
+    case '[':
+        token = create_token(s->line, column_start, tt_LeftSquareBracket);
+        break;
+    case ']':
+        token = create_token(s->line, column_start, tt_RightSquareBracket);
+        break;
+    case '<':
+        token = create_token(s->line, column_start, tt_Less);
+        break;
+    case '>':
+        token = create_token(s->line, column_start, tt_Greater);
+        break;
     case '+':
         token = create_token(s->line, column_start, tt_Plus);
         break;
     case ',':
         token = create_token(s->line, column_start, tt_Comma);
+        break;
+    case '=':
+        token = create_token(s->line, column_start, tt_Assign);
+        break;
+    case ':':
+        token = create_token(s->line, column_start, tt_Colon);
+        break;
+    case ';':
+        token = create_token(s->line, column_start, tt_Semicolon);
+        break;
+    case '.':
+        token = create_token(s->line, column_start, tt_Period);
+        break;
+    case '%':
+        token = create_token(s->line, column_start, tt_Percent);
+        break;
+    case '*':
+        token = create_token(s->line, column_start, tt_Asterisk);
+        break;
+    case '&':
+        token = create_token(s->line, column_start, tt_Ampersand);
+        break;
+    case '/':
+        token = create_token(s->line, column_start, tt_Slash);
+        break;
+    case '!':
+        token = create_token(s->line, column_start, tt_Not);
         break;
     default:
         token = create_token_with_literal(s->line, column_start, tt_Illegal, new_str_from_byte(b));
