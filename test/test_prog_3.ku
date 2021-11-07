@@ -1,0 +1,4 @@
+// Hello world program in Ku
+
+var s str = "Hello, world!\n"  
+print(s)

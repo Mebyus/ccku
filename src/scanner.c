@@ -305,6 +305,50 @@ Token scan_number(Scanner *s) {
     return token;
 }
 
+Token scan_string_literal(Scanner *s) {
+    uint64_t start_pos = s->pos - 1;
+
+    Token token = {
+        .line   = s->line,
+        .column = s->column - 1,
+    };
+
+    int code;
+    do {
+        code = advance(s);
+    } while (code != text_eof && code != '"');
+
+    uint64_t end_pos = s->pos;
+    str literal      = new_str_slice(s->text, start_pos, end_pos);
+    token.literal    = literal;
+    token.type       = tt_String;
+
+    return token;
+}
+
+Token scan_line_comment(Scanner *s) {
+    uint64_t start_pos = s->pos - 1;
+
+    Token token = {
+        .line   = s->line,
+        .column = s->column - 1,
+    };
+
+    advance(s); // skip '/' before the actual comment
+
+    int code;
+    do {
+        code = advance(s);
+    } while (code != text_eof && code != '\n');
+
+    uint64_t end_pos = s->pos - 1;
+    str literal      = new_str_slice(s->text, start_pos, end_pos);
+    token.literal    = literal;
+    token.type       = tt_Comment;
+
+    return token;
+}
+
 Token scan_other(Scanner *s) {
     Token token;
 
@@ -368,6 +412,19 @@ Token scan_next_token(Scanner *s) {
     if (is_decimal_digit(b)) {
         token = scan_number(s);
         return token;
+    }
+
+    if (b == '"') {
+        token = scan_string_literal(s);
+        return token;
+    }
+
+    if (b == '/') {
+        code = peek(s);
+        if (code == '/') {
+            token = scan_line_comment(s);
+            return token;
+        }
     }
 
     token = scan_other(s);
