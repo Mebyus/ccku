@@ -26,6 +26,7 @@ struct Scanner {
 };
 
 Scanner *new_scanner_from_source(SourceText source);
+Scanner *new_scanner_from_str(str s);
 Token scan_next_token(Scanner *s);
 
 void free_scanner(Scanner *s);

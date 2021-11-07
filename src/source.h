@@ -32,6 +32,7 @@ struct SourceReadResult {
 };
 
 SourceReadResult read_source_from_file(char *path);
+SourceText new_source_from_str(str s);
 void free_source(SourceText source);
 
 #endif // KU_SOURCE_H

@@ -77,14 +77,25 @@ SourceReadResult read_source_from_file(char *path) {
         return result;
     }
 
-    str filepath = new_str_from_cstr(path);
-
     result = read_source_from_fd(fd);
     close(fd);
 
-    result.source.filepath = filepath;
+    if (result.erc != srec_NotAnError) {
+        return result;
+    }
 
+    result.source.filepath = new_str_from_cstr(path);
+    result.source.filename = new_null_str();
     return result;
+}
+
+SourceText new_source_from_str(str s) {
+    SourceText source = {
+        .filename = new_null_str(),
+        .filepath = new_null_str(),
+        .text     = s,
+    };
+    return source;
 }
 
 void free_source(SourceText source) {

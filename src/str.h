@@ -15,6 +15,7 @@ struct str {
     uint64_t len;
 };
 
+str new_null_str();
 str new_str_from_cstr(char *s);
 str new_str_from_buf(char *buf, uint64_t size);
 str new_str_from_bytes(uint8_t *bytes, uint64_t size);

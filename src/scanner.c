@@ -23,6 +23,10 @@ Scanner *new_scanner_from_source(SourceText source) {
     return scanner;
 }
 
+Scanner *new_scanner_from_str(str s) {
+    return new_scanner_from_source(new_source_from_str(s));
+}
+
 bool is_letter_or_underscore(uint8_t b) {
     return ('a' <= b && b <= 'z') || b == '_' || ('A' <= b && b <= 'Z');
 }
