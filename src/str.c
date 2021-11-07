@@ -7,6 +7,20 @@
 
 const uint8_t max_uint32_decimal_length = 10;
 const uint8_t zero_charcode             = '0';
+const uint32_t max_small_decimal        = 99;
+
+const uint8_t decimal_digits_string[10] = "0123456789";
+
+const uint8_t small_decimals_string[200] = "00010203040506070809"
+                                           "10111213141516171819"
+                                           "20212223242526272829"
+                                           "30313233343536373839"
+                                           "40414243444546474849"
+                                           "50515253545556575859"
+                                           "60616263646566676869"
+                                           "70717273747576777879"
+                                           "80818283848586878889"
+                                           "90919293949596979899";
 
 str new_null_str() {
     str s = {
@@ -100,6 +114,15 @@ str take_str_from_cstr(char *cstr) {
     return take_str_from_buf(cstr, strlen(cstr));
 }
 
+str borrow_str_from_bytes(const uint8_t *bytes, uint64_t size) {
+    str s = {
+        .is_owner = false,
+        .bytes    = (uint8_t *)(void *)bytes, // dirty trick to avoid compiler warning
+        .len      = size,
+    };
+    return s;
+}
+
 uint8_t decimal_digit_to_charcode(uint8_t digit) {
     return (uint8_t)(digit + zero_charcode);
 }
@@ -128,7 +151,18 @@ uint8_t format_uint64_decimal_to_buf(uint64_t n, uint8_t *buf) {
     return i;
 }
 
+str format_small_decimal(uint32_t n) {
+    if (n < 10) {
+        return borrow_str_from_bytes(decimal_digits_string + n, 1);
+    }
+    return borrow_str_from_bytes(small_decimals_string + n * 2, 2);
+}
+
 str format_uint32_decimal(uint32_t n) {
+    if (n <= max_small_decimal) {
+        return format_small_decimal(n);
+    }
+
     uint8_t *bytes = (uint8_t *)malloc(max_uint32_decimal_length);
     if (bytes == NULL) {
         fatal(1, "not enough memory for new string");
