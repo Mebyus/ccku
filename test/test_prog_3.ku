@@ -2,8 +2,8 @@
 
 // Declare "s" variable to a hold string
 // str is a built-in type for string
-var s str = "Hello, world!\n"  
-print(s) // print() is a built-in function
+var s str = "Hello, world!\n"  ;
+print(s); // print() is a built-in function
 
-s2 := "You can escape \" in a string literal"
-println(s2) // println() is also built-in
+s2 := "You can escape \" in a string literal";
+println(s2); // println() is also built-in
