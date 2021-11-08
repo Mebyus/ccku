@@ -384,6 +384,43 @@ Token scan_character_literal(Scanner *s) {
     return token;
 }
 
+Token scan_colon_start(Scanner *s) {
+    Token token = {
+        .line   = s->line,
+        .column = s->column - 1,
+    };
+
+    int code = peek(s);
+    if (code == '=') {
+        advance(s);
+        token.type = tt_Define;
+    } else {
+        token.type = tt_Colon;
+    }
+
+    return token;
+}
+
+Token scan_plus_start(Scanner *s) {
+    Token token = {
+        .line   = s->line,
+        .column = s->column - 1,
+    };
+
+    int code = peek(s);
+    if (code == '=') {
+        advance(s);
+        token.type = tt_AddAssign;
+    } else if (code == '+') {
+        advance(s);
+        token.type = tt_Increment;
+    } else {
+        token.type = tt_Plus;
+    }
+
+    return token;
+}
+
 Token scan_other(Scanner *s) {
     Token token;
 
@@ -415,7 +452,7 @@ Token scan_other(Scanner *s) {
         token = create_token(s->line, column_start, tt_Greater);
         break;
     case '+':
-        token = create_token(s->line, column_start, tt_Plus);
+        token = scan_plus_start(s);
         break;
     case ',':
         token = create_token(s->line, column_start, tt_Comma);
@@ -424,7 +461,7 @@ Token scan_other(Scanner *s) {
         token = create_token(s->line, column_start, tt_Assign);
         break;
     case ':':
-        token = create_token(s->line, column_start, tt_Colon);
+        token = scan_colon_start(s);
         break;
     case ';':
         token = create_token(s->line, column_start, tt_Semicolon);

@@ -49,6 +49,7 @@ enum TokenType {
     tt_Assign,  // =
     tt_Not,     // !
 
+    tt_Define,          // :=
     tt_AddAssign,       // +=
     tt_SubstractAssign, // -=
     tt_MultiplyAssign,  // *=

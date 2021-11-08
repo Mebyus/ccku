@@ -1,5 +1,7 @@
 // Hello world program in Ku
 
+// Declare "s" variable to a hold string
+// str is a built-in type for string
 var s str = "Hello, world!\n"  
 print(s) // print() is a built-in function
 
