@@ -8,7 +8,15 @@
 typedef struct Parser Parser;
 
 struct Parser {
+    // True means next token was prefetched and
+    // we don't need to perform scan in order to
+    // obtain it
+    bool prefetched;
+
     Scanner *scanner;
+
+    Token prev_token;
+    Token next_token;
 };
 
 slice_of_Statements parse_str(str s);

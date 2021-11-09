@@ -3,6 +3,7 @@
 
 #include "slice.h"
 #include "str.h"
+#include "token.h"
 
 typedef enum StatementType StatementType;
 typedef enum ExpressionType ExpressionType;
@@ -18,11 +19,13 @@ TYPEDEF_SLICE(Expression)
 TYPEDEF_SLICE(CallArgument)
 
 enum StatementType {
+    st_Empty,
     st_Block,
     st_Assign,
     st_Defer,
     st_Expression,
     st_FunctionDeclaration,
+    st_Define,
     st_Import,
     st_Module,
     st_Return,
@@ -56,11 +59,18 @@ struct Identifier {
 
 struct CallExpression {
     str function_name;
-    slice_of_CallArguments args;
+    slice_of_Expressions args;
 };
 
 struct CallArgument {
     Expression expression;
 };
+
+Statement get_empty_statement();
+Statement get_define_statement(slice_of_Expressions left, slice_of_Expressions right);
+Statement get_expression_statement(Expression expr);
+
+Expression get_identifier_expression(Token token);
+Expression get_call_expression(Token name_token, slice_of_Expressions args);
 
 #endif // KU_STATEMENT_H

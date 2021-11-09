@@ -24,6 +24,7 @@ str new_str_slice(str s, uint64_t start, uint64_t end);
 str take_str_from_cstr(char *s);
 str take_str_from_buf(char *buf, uint64_t size);
 str take_str_from_bytes(uint8_t *bytes, uint64_t size);
+str take_str_from_str(str *s);
 str borrow_str_from_bytes(const uint8_t *bytes, uint64_t size);
 str copy_str(str s);
 str format_uint32_decimal(uint32_t n);

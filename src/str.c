@@ -114,6 +114,17 @@ str take_str_from_cstr(char *cstr) {
     return take_str_from_buf(cstr, strlen(cstr));
 }
 
+str take_str_from_str(str *s) {
+    str new_str = {
+        .is_owner = s->is_owner,
+        .bytes    = s->bytes,
+        .len      = s->len,
+    };
+    s->is_owner = false;
+    return new_str;
+}
+
+
 str borrow_str_from_bytes(const uint8_t *bytes, uint64_t size) {
     str s = {
         .is_owner = false,
