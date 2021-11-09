@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 #include "fatal.h"
-#include "scanner.h"
+#include "parser.h"
 #include "source.h"
 
 int main(int argc, char **argv) {
@@ -17,14 +17,6 @@ int main(int argc, char **argv) {
         fatal(read_result.erc, "error reading file");
     }
 
-    Scanner *scanner = new_scanner_from_source(read_result.source);
-
-    Token token;
-    do {
-        token = scan_next_token(scanner);
-        print_token(token);
-    } while (token.type != tt_EOF);
-
-    free_scanner(scanner);
+    parse_source(read_result.source);
     return 0;
 }

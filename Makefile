@@ -17,7 +17,8 @@ CPPFLAGS = -MMD -MP -MF
 CFLAGS = -Wall -Wextra -Wconversion -Werror -std=c${CSTANDARD} -O${OPTIMIZATION}
 
 ${BINPATH}: ${OBJDIR}/cmd.o ${OBJDIR}/source.o ${OBJDIR}/scanner.o \
-${OBJDIR}/token.o ${OBJDIR}/str.o ${OBJDIR}/fatal.o
+${OBJDIR}/token.o ${OBJDIR}/str.o ${OBJDIR}/fatal.o ${OBJDIR}/slice.o \
+${OBJDIR}/statement.o ${OBJDIR}/parser.o
 	${CC} -o $@ $^
 
 ${OBJDIR}/cmd.o: ${SRCDIR}/cmd.c
@@ -39,6 +40,18 @@ ${OBJDIR}/token.o: ${SRCDIR}/token.c
 ${OBJDIR}/str.o: ${SRCDIR}/str.c
 	${CC} ${CPPFLAGS} ${DEPDIR}/str.d ${CFLAGS} -o $@ -c $<
 -include ${DEPDIR}/str.d
+
+${OBJDIR}/slice.o: ${SRCDIR}/slice.c
+	${CC} ${CPPFLAGS} ${DEPDIR}/slice.d ${CFLAGS} -o $@ -c $<
+-include ${DEPDIR}/slice.d
+
+${OBJDIR}/statement.o: ${SRCDIR}/statement.c
+	${CC} ${CPPFLAGS} ${DEPDIR}/statement.d ${CFLAGS} -o $@ -c $<
+-include ${DEPDIR}/statement.d
+
+${OBJDIR}/parser.o: ${SRCDIR}/parser.c
+	${CC} ${CPPFLAGS} ${DEPDIR}/parser.d ${CFLAGS} -o $@ -c $<
+-include ${DEPDIR}/parser.d
 
 ${OBJDIR}/fatal.o: ${SRCDIR}/fatal.c
 	${CC} ${CPPFLAGS} ${DEPDIR}/fatal.d ${CFLAGS} -o $@ -c $<

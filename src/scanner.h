@@ -25,8 +25,10 @@ struct Scanner {
     bool insert_semi;
 };
 
-Scanner *new_scanner_from_source(SourceText source);
 Scanner *new_scanner_from_str(str s);
+Scanner *new_scanner_from_source(SourceText source);
+Scanner *new_scanner_from_file(char *path);
+
 Token scan_next_token(Scanner *s);
 
 void free_scanner(Scanner *s);
