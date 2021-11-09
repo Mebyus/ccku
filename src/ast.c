@@ -1,4 +1,4 @@
-#include "statement.h"
+#include "ast.h"
 
 Statement get_empty_statement() {
     Statement stmt = {

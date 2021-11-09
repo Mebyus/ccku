@@ -18,7 +18,7 @@ CFLAGS = -Wall -Wextra -Wconversion -Werror -std=c${CSTANDARD} -O${OPTIMIZATION}
 
 ${BINPATH}: ${OBJDIR}/cmd.o ${OBJDIR}/source.o ${OBJDIR}/scanner.o \
 ${OBJDIR}/token.o ${OBJDIR}/str.o ${OBJDIR}/fatal.o ${OBJDIR}/slice.o \
-${OBJDIR}/statement.o ${OBJDIR}/parser.o
+${OBJDIR}/ast.o ${OBJDIR}/parser.o
 	${CC} -o $@ $^
 
 ${OBJDIR}/cmd.o: ${SRCDIR}/cmd.c
@@ -45,9 +45,9 @@ ${OBJDIR}/slice.o: ${SRCDIR}/slice.c
 	${CC} ${CPPFLAGS} ${DEPDIR}/slice.d ${CFLAGS} -o $@ -c $<
 -include ${DEPDIR}/slice.d
 
-${OBJDIR}/statement.o: ${SRCDIR}/statement.c
-	${CC} ${CPPFLAGS} ${DEPDIR}/statement.d ${CFLAGS} -o $@ -c $<
--include ${DEPDIR}/statement.d
+${OBJDIR}/ast.o: ${SRCDIR}/ast.c
+	${CC} ${CPPFLAGS} ${DEPDIR}/ast.d ${CFLAGS} -o $@ -c $<
+-include ${DEPDIR}/ast.d
 
 ${OBJDIR}/parser.o: ${SRCDIR}/parser.c
 	${CC} ${CPPFLAGS} ${DEPDIR}/parser.d ${CFLAGS} -o $@ -c $<
