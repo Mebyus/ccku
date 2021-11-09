@@ -1,28 +1,34 @@
 #include "parser.h"
 
-Token advance(Parser *p) {
+Token get_next_token(Parser *p) {
     Token token;
     if (p->prefetched) {
         p->prefetched = false;
-        token         = p->next_token;
+        token         = p->prefetched_token;
     } else {
         token = scan_next_token(p->scanner);
+        print_token(token); // [DEBUG]
     }
-    p->prev_token = token;
-    print_token(token);
     return token;
 }
 
-Token peek(Parser *p) {
-    Token token;
-    if (p->prefetched) {
-        token = p->next_token;
-    } else {
-        token         = scan_next_token(p->scanner);
-        p->next_token = token;
-        p->prefetched = true;
-    }
-    return token;
+void advance(Parser *p) {
+    p->prev_token = p->token;
+    p->token      = p->next_token;
+    p->next_token = get_next_token(p);
+}
+
+void advance_backup(Parser *p) {
+    p->backup_token = p->prev_token;
+    advance(p);
+}
+
+void step_back(Parser *p) {
+    p->prefetched       = true;
+    p->prefetched_token = p->next_token;
+    p->next_token       = p->token;
+    p->token            = p->prev_token;
+    p->prev_token       = p->backup_token;
 }
 
 Expression parse_expression(Parser *p) {}
@@ -32,9 +38,9 @@ Statement parse_define_statement(Parser *p) {
     append_Expression_to_slice(&left, get_identifier_expression(p->prev_token));
 
     advance(p); // swallow ":=" token
-
+    advance(p);
     slice_of_Expressions right = new_null_slice_of_Expressions();
-    append_Expression_to_slice(&right, get_identifier_expression(advance(p)));
+    append_Expression_to_slice(&right, get_identifier_expression(p->token));
 
     advance(p); // swallow ";" token
 
@@ -57,14 +63,13 @@ Statement parse_call_statement(Parser *p) {
 }
 
 Statement parse_statement(Parser *p) {
-    Token token = advance(p);
-    switch (token.type) {
+    advance(p);
+    switch (p->token.type) {
     case tt_Identifier:
-        Token next_token = peek(p);
-        if (next_token.type == tt_Define) {
+        if (p->next_token.type == tt_Define) {
             return parse_define_statement(p);
         }
-        if (next_token.type == tt_LeftRoundBracket) {
+        if (p->next_token.type == tt_LeftRoundBracket) {
             return parse_call_statement(p);
         }
         break;

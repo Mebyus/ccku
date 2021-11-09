@@ -13,10 +13,13 @@ struct Parser {
     // obtain it
     bool prefetched;
 
-    Scanner *scanner;
-
+    Token backup_token;
     Token prev_token;
+    Token token;
     Token next_token;
+    Token prefetched_token;
+
+    Scanner *scanner;
 };
 
 slice_of_Statements parse_str(str s);
