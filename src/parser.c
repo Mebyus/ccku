@@ -11,7 +11,7 @@ Token get_next_token(Parser *p) {
         p->prefetched = false;
         token         = p->prefetched_token;
     } else {
-        token = scan_next_token(p->scanner);
+        token = scan_token(p->scanner);
         DEBUG(print_token(token);)
     }
     return token;

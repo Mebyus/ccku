@@ -4,28 +4,99 @@
 #include "fatal.h"
 #include "scanner.h"
 
-const int text_eof = -1;
+const uint64_t scanner_buffer_size = 2;
+
+int get_next_code(Scanner *s) {
+    int code;
+    if (s->prefetched) {
+        s->prefetched = false;
+        code          = s->prefetched_code;
+    } else {
+        code = read_next_code(&s->reader);
+    }
+    return code;
+}
+
+void advance_scanner(Scanner *s) {
+    if (s->code >= 0) {
+        if (s->code == '\n') {
+            s->pos = next_line(s->pos);
+        } else {
+            s->pos = next_column(s->pos);
+        }
+    }
+    s->prev_code = s->code;
+    s->code      = s->next_code;
+    s->next_code = get_next_code(s);
+}
+
+void backup_advance_scanner(Scanner *s) {
+    s->prev_pos    = s->pos;
+    s->backup_code = s->prev_code;
+    advance_scanner(s);
+}
+
+void step_back_scanner(Scanner *s) {
+    s->prefetched      = true;
+    s->prefetched_code = s->next_code;
+    s->next_code       = s->code;
+    s->code            = s->prev_code;
+    s->prev_code       = s->backup_code;
+    s->pos             = s->prev_pos;
+}
+
+void init_scanner_buffer(Scanner *s) {
+    for (uint64_t i = 0; i < scanner_buffer_size; i++) {
+        advance_scanner(s);
+    }
+}
 
 Scanner *new_scanner_from_source(SourceText source) {
-    Scanner *scanner = (Scanner *)malloc(sizeof(Scanner));
-    if (scanner == NULL) {
+    Scanner *s = (Scanner *)malloc(sizeof(Scanner));
+    if (s == NULL) {
         fatal(1, "not enough memory for new scanner");
     }
 
-    scanner->column      = 1;
-    scanner->line        = 1;
-    scanner->pos         = 0;
-    scanner->source      = source;
-    scanner->text        = source.text;
-    scanner->started     = false;
-    scanner->insert_semi = false;
-
-    return scanner;
+    s->prefetched = false;
+    s->pos        = init_null_position();
+    s->prev_code  = ReaderBOF;
+    s->code       = ReaderBOF;
+    s->next_code  = ReaderBOF;
+    s->reader     = init_str_byte_reader(source.text);
+    init_scanner_buffer(s);
+    return s;
 }
 
 Scanner *new_scanner_from_str(str s) {
     return new_scanner_from_source(new_source_from_str(s));
 }
+
+Scanner init_scanner_from_source(SourceText source) {
+    Scanner s = {
+        .prefetched = false,
+        .pos        = init_null_position(),
+        .prev_code  = ReaderBOF,
+        .code       = ReaderBOF,
+        .next_code  = ReaderBOF,
+        .reader     = init_str_byte_reader(source.text),
+    };
+    init_scanner_buffer(&s);
+    return s;
+}
+
+Scanner init_scanner_from_str(str string) {
+    Scanner s = {
+        .prefetched = false,
+        .pos        = init_null_position(),
+        .prev_code  = ReaderBOF,
+        .code       = ReaderBOF,
+        .next_code  = ReaderBOF,
+        .reader     = init_str_byte_reader(string),
+    };
+    init_scanner_buffer(&s);
+    return s;
+}
+
 
 bool is_letter_or_underscore(uint8_t b) {
     return ('a' <= b && b <= 'z') || b == '_' || ('A' <= b && b <= 'Z');
@@ -59,102 +130,58 @@ bool is_whitespace(uint8_t b) {
     return b == ' ' || b == '\n' || b == '\t' || b == '\r';
 }
 
-int advance_scanner(Scanner *s) {
-    if (s->pos >= s->text.len) {
-        return text_eof;
+void skip_whitespace(Scanner *s) {
+    while (s->code >= 0 && is_whitespace((uint8_t)s->code)) {
+        advance_scanner(s);
     }
-
-    uint8_t b = s->text.bytes[s->pos];
-    if (b == '\n') {
-        s->column = 1;
-        s->line++;
-    } else {
-        s->column++;
-    }
-
-    s->pos++;
-    s->prev_byte = b;
-    return (int)b;
 }
 
-int peek(Scanner *s) {
-    if (s->pos < s->text.len) {
-        uint8_t b = s->text.bytes[s->pos];
-        return (int)b;
-    }
-
-    return text_eof;
+Token create_token_at_scanner_position(Scanner *s, TokenType type) {
+    return create_token(type, s->pos);
 }
 
-uint8_t step_back_scanner(Scanner *s) {
-    s->pos--;
-    if (s->prev_byte == '\n') {
-        s->line--;
-    }
-    s->column--;
-    return s->prev_byte;
-}
-
-int skip_whitespace(Scanner *s) {
-    int code;
+void consume_word(Scanner *s) {
     do {
-        code = advance_scanner(s);
-    } while (code != text_eof && is_whitespace((uint8_t)code));
-
-    if (code == text_eof) {
-        return text_eof;
-    }
-
-    return step_back_scanner(s);
+        advance_scanner(s);
+    } while (s->code != ReaderEOF && is_alphanum((uint8_t)s->code));
 }
 
 Token scan_illegal_word(Scanner *s) {
-    uint64_t start_pos = s->pos - 1;
-
     Token token = {
-        .line   = s->line,
-        .column = s->column - 1,
+        .type = tt_Illegal,
+        .pos  = s->pos,
     };
+    uint64_t reader_start_pos = s->reader.pos - scanner_buffer_size;
 
-    int code;
-    do {
-        code = advance_scanner(s);
-    } while (code != text_eof && is_alphanum((uint8_t)code));
+    consume_word(s);
 
-    if (code != text_eof) {
-        step_back_scanner(s);
+    if (s->code == ReaderEOF) {
+        token.literal = new_str_slice_to_end(s->reader.s, reader_start_pos);
+        return token;
     }
 
-    uint64_t end_pos = s->pos;
-    str literal      = new_str_slice(s->text, start_pos, end_pos);
-    token.literal    = literal;
-    token.type       = tt_Illegal;
+    uint64_t reader_end_pos = s->reader.pos - scanner_buffer_size;
+    token.literal           = new_str_slice(s->reader.s, reader_start_pos, reader_end_pos);
 
     return token;
 }
 
 Token scan_name(Scanner *s) {
-    uint64_t start_pos = s->pos - 1;
-
     Token token = {
-        .line   = s->line,
-        .column = s->column - 1,
+        .pos = s->pos,
     };
+    uint64_t reader_start_pos = s->reader.pos - scanner_buffer_size;
 
-    int code;
-    do {
-        code = advance_scanner(s);
-    } while (code != text_eof && is_alphanum((uint8_t)code));
+    consume_word(s);
 
-    if (code != text_eof) {
-        step_back_scanner(s);
+    if (s->code == ReaderEOF) {
+        token.literal = new_str_slice_to_end(s->reader.s, reader_start_pos);
+    } else {
+        uint64_t reader_end_pos = s->reader.pos - scanner_buffer_size;
+        token.literal           = new_str_slice(s->reader.s, reader_start_pos, reader_end_pos);
     }
 
-    uint64_t end_pos = s->pos;
-    str literal      = new_str_slice(s->text, start_pos, end_pos);
-    token.literal    = literal;
-
-    KeywordLookupResult keyword_lookup_result = lookup_keyword(literal);
+    KeywordLookupResult keyword_lookup_result = lookup_keyword(token.literal);
     if (keyword_lookup_result.found) {
         token.type = keyword_lookup_result.type;
     } else {
@@ -219,26 +246,36 @@ Token scan_octal_number(Scanner *s) {
 }
 
 Token scan_decimal_number(Scanner *s) {
-    uint64_t start_pos = s->pos - 1;
-
     Token token = {
-        .line   = s->line,
-        .column = s->column - 1,
+        .pos = s->pos,
     };
+    uint64_t reader_start_pos = s->reader.pos - scanner_buffer_size;
 
-    int code;
     do {
-        code = advance_scanner(s);
-    } while (code != text_eof && is_decimal_digit((uint8_t)code));
+        advance_scanner(s);
+    } while (s->code != ReaderEOF && is_decimal_digit((uint8_t)s->code));
 
-    if (code != text_eof) {
-        step_back_scanner(s);
+    if (s->code == ReaderEOF) {
+        token.literal = new_str_slice_to_end(s->reader.s, reader_start_pos);
+        token.type    = tt_Integer;
+        return token;
+    } else if (is_alphanum((uint8_t)s->code)) {
+        token.type = tt_Illegal;
+        consume_word(s);
+
+        if (s->code == ReaderEOF) {
+            token.literal = new_str_slice_to_end(s->reader.s, reader_start_pos);
+            return token;
+        }
+
+        uint64_t reader_end_pos = s->reader.pos - scanner_buffer_size;
+        token.literal           = new_str_slice(s->reader.s, reader_start_pos, reader_end_pos);
+        return token;
     }
 
-    uint64_t end_pos = s->pos;
-    str literal      = new_str_slice(s->text, start_pos, end_pos);
-    token.literal    = literal;
-    token.type       = tt_Integer;
+    uint64_t reader_end_pos = s->reader.pos - scanner_buffer_size;
+    token.literal           = new_str_slice(s->reader.s, reader_start_pos, reader_end_pos);
+    token.type              = tt_Integer;
 
     return token;
 }
@@ -273,269 +310,223 @@ Token scan_hexadecimal_number(Scanner *s) {
 Token scan_number(Scanner *s) {
     Token token;
 
-    uint8_t b = s->prev_byte;
-    if (b != '0') {
+    if (s->code != '0') {
         return scan_decimal_number(s);
     }
 
-    int code = peek(s);
-
-    if (code == text_eof) {
-        token = create_token_with_literal(s->line, s->column - 1, tt_Integer, new_str_from_byte('0'));
+    if (s->next_code == ReaderEOF) {
+        token = create_token_with_literal(tt_Integer, s->pos, new_str_from_byte('0'));
         return token;
     }
 
-    if (code == 'b') {
+    if (s->next_code == 'b') {
         token = scan_binary_number(s);
         return token;
     }
 
-    if (code == 'o') {
+    if (s->next_code == 'o') {
         token = scan_octal_number(s);
         return token;
     }
 
-    if (code == 'x') {
+    if (s->next_code == 'x') {
         token = scan_hexadecimal_number(s);
         return token;
     }
 
-    if (is_alphanum((uint8_t)code)) {
+    if (is_alphanum((uint8_t)s->next_code)) {
         token = scan_illegal_word(s);
         return token;
     }
 
-    token = create_token_with_literal(s->line, s->column - 1, tt_Integer, new_str_from_byte('0'));
+    token = create_token_with_literal(tt_Integer, s->pos, new_str_from_byte('0'));
     return token;
 }
 
 Token scan_string_literal(Scanner *s) {
-    uint64_t start_pos = s->pos - 1;
-
     Token token = {
-        .line   = s->line,
-        .column = s->column - 1,
+        .pos = s->pos,
     };
+    uint64_t reader_start_pos = s->reader.pos - scanner_buffer_size;
 
-    int code;
-    bool escaped = false;
-    bool skip_qoute;
     do {
-        skip_qoute = false;
+        advance_scanner(s);
+    } while (s->code != ReaderEOF && (s->code != '"' || s->prev_code == '\\'));
 
-        code = advance_scanner(s);
-        if (!escaped && code == '\\') {
-            escaped = true;
-        } else if (escaped) {
-            escaped    = false;
-            skip_qoute = true;
-        }
-    } while (code != text_eof && (skip_qoute || code != '"'));
+    if (s->code != '"') {
+        token.literal = new_str_slice_to_end(s->reader.s, reader_start_pos);
+        token.type    = tt_Illegal;
+        return token;
+    }
 
-    uint64_t end_pos = s->pos;
-    str literal      = new_str_slice(s->text, start_pos, end_pos);
-    token.literal    = literal;
-    token.type       = tt_String;
+    uint64_t reader_end_pos = s->reader.pos - scanner_buffer_size;
+    token.literal           = new_str_slice(s->reader.s, reader_start_pos, reader_end_pos);
+    token.type              = tt_String;
+    advance_scanner(s);
 
     return token;
 }
 
 Token scan_line_comment(Scanner *s) {
-    uint64_t start_pos = s->pos - 1;
-
     Token token = {
-        .line   = s->line,
-        .column = s->column - 1,
+        .type = tt_Comment,
+        .pos  = s->pos,
     };
+    uint64_t reader_start_pos = s->reader.pos - scanner_buffer_size;
 
-    advance_scanner(s); // skip '/' before the actual comment
-
-    int code;
     do {
-        code = advance_scanner(s);
-    } while (code != text_eof && code != '\n');
+        advance_scanner(s);
+    } while (s->code != ReaderEOF && s->code != '\n');
 
-    uint64_t end_pos = s->pos - 1;
-    str literal      = new_str_slice(s->text, start_pos, end_pos);
-    token.literal    = literal;
-    token.type       = tt_Comment;
+    if (s->code != '\n') {
+        token.literal = new_str_slice_to_end(s->reader.s, reader_start_pos);
+        return token;
+    }
+
+    uint64_t reader_end_pos = s->reader.pos - scanner_buffer_size;
+    token.literal           = new_str_slice(s->reader.s, reader_start_pos, reader_end_pos);
+    advance_scanner(s);
 
     return token;
 }
 
 Token scan_character_literal(Scanner *s) {
-    uint64_t start_pos = s->pos - 1;
-
     Token token = {
-        .line   = s->line,
-        .column = s->column - 1,
+        .pos = s->pos,
     };
+    uint64_t reader_start_pos = s->reader.pos - scanner_buffer_size;
 
-    int code;
     do {
-        code = advance_scanner(s);
-    } while (code != text_eof && code != '\'');
+        advance_scanner(s);
+    } while (s->code != ReaderEOF && s->code != '\'');
 
-    uint64_t end_pos = s->pos;
-    str literal      = new_str_slice(s->text, start_pos, end_pos);
-    token.literal    = literal;
-    token.type       = tt_Character;
+    if (s->code != '\'') {
+        token.literal = new_str_slice_to_end(s->reader.s, reader_start_pos);
+        token.type    = tt_Illegal;
+        return token;
+    }
+
+    uint64_t reader_end_pos = s->reader.pos - scanner_buffer_size;
+    token.literal           = new_str_slice(s->reader.s, reader_start_pos, reader_end_pos);
+    token.type              = tt_Character;
+    advance_scanner(s);
 
     return token;
 }
 
 Token scan_colon_start(Scanner *s) {
-    Token token = {
-        .line   = s->line,
-        .column = s->column - 1,
-    };
+    Token token;
 
-    int code = peek(s);
-    if (code == '=') {
+    if (s->next_code == '=') {
+        token = create_token_at_scanner_position(s, tt_Define);
         advance_scanner(s);
-        token.type = tt_Define;
+        advance_scanner(s);
     } else {
-        token.type = tt_Colon;
+        token = create_token_at_scanner_position(s, tt_Colon);
+        advance_scanner(s);
     }
 
     return token;
 }
 
 Token scan_plus_start(Scanner *s) {
-    Token token = {
-        .line   = s->line,
-        .column = s->column - 1,
-    };
+    Token token;
 
-    int code = peek(s);
-    if (code == '=') {
+    if (s->next_code == '=') {
+        token = create_token_at_scanner_position(s, tt_AddAssign);
         advance_scanner(s);
-        token.type = tt_AddAssign;
-    } else if (code == '+') {
         advance_scanner(s);
-        token.type = tt_Increment;
+    } else if (s->next_code == '+') {
+        token = create_token_at_scanner_position(s, tt_Increment);
+        advance_scanner(s);
+        advance_scanner(s);
     } else {
-        token.type = tt_Plus;
+        token = create_token_at_scanner_position(s, tt_Plus);
+        advance_scanner(s);
     }
 
     return token;
 }
 
 Token scan_other(Scanner *s) {
-    Token token;
-
-    uint32_t column_start = s->column - 1;
-    uint8_t b             = s->prev_byte;
-    switch (b) {
+    switch (s->code) {
     case '(':
-        token = create_token(s->line, column_start, tt_LeftRoundBracket);
-        break;
+        return create_token_at_scanner_position(s, tt_LeftRoundBracket);
     case ')':
-        token = create_token(s->line, column_start, tt_RightRoundBracket);
-        break;
+        return create_token_at_scanner_position(s, tt_RightRoundBracket);
     case '{':
-        token = create_token(s->line, column_start, tt_LeftCurlyBracket);
-        break;
+        return create_token_at_scanner_position(s, tt_LeftCurlyBracket);
     case '}':
-        token = create_token(s->line, column_start, tt_RightCurlyBracket);
-        break;
+        return create_token_at_scanner_position(s, tt_RightCurlyBracket);
     case '[':
-        token = create_token(s->line, column_start, tt_LeftSquareBracket);
-        break;
+        return create_token_at_scanner_position(s, tt_LeftSquareBracket);
     case ']':
-        token = create_token(s->line, column_start, tt_RightSquareBracket);
-        break;
+        return create_token_at_scanner_position(s, tt_RightSquareBracket);
     case '<':
-        token = create_token(s->line, column_start, tt_Less);
-        break;
+        return create_token_at_scanner_position(s, tt_Less);
     case '>':
-        token = create_token(s->line, column_start, tt_Greater);
-        break;
+        return create_token_at_scanner_position(s, tt_Greater);
     case '+':
-        token = scan_plus_start(s);
-        break;
+        return scan_plus_start(s);
     case ',':
-        token = create_token(s->line, column_start, tt_Comma);
-        break;
+        return create_token_at_scanner_position(s, tt_Comma);
     case '=':
-        token = create_token(s->line, column_start, tt_Assign);
-        break;
+        return create_token_at_scanner_position(s, tt_Assign);
     case ':':
-        token = scan_colon_start(s);
-        break;
+        return scan_colon_start(s);
     case ';':
-        token = create_token(s->line, column_start, tt_Semicolon);
-        break;
+        return create_token_at_scanner_position(s, tt_Semicolon);
     case '.':
-        token = create_token(s->line, column_start, tt_Period);
-        break;
+        return create_token_at_scanner_position(s, tt_Period);
     case '%':
-        token = create_token(s->line, column_start, tt_Percent);
-        break;
+        return create_token_at_scanner_position(s, tt_Percent);
     case '*':
-        token = create_token(s->line, column_start, tt_Asterisk);
-        break;
+        return create_token_at_scanner_position(s, tt_Asterisk);
     case '&':
-        token = create_token(s->line, column_start, tt_Ampersand);
-        break;
+        return create_token_at_scanner_position(s, tt_Ampersand);
     case '/':
-        token = create_token(s->line, column_start, tt_Slash);
-        break;
+        return create_token_at_scanner_position(s, tt_Slash);
     case '!':
-        token = create_token(s->line, column_start, tt_Not);
-        break;
+        return create_token_at_scanner_position(s, tt_Not);
     default:
-        token = create_token_with_literal(s->line, column_start, tt_Illegal, new_str_from_byte(b));
-        break;
+        return create_token_with_literal(tt_Illegal, s->pos, new_str_from_byte(s->code));
     }
-
-    return token;
 }
 
-Token scan_next_token(Scanner *s) {
+Token scan_token(Scanner *s) {
     Token token;
-    int code = peek(s);
-    if (code == text_eof) {
-        token = create_token(s->line, s->column, tt_EOF);
+    if (s->code == ReaderEOF) {
+        token = create_token_at_scanner_position(s, tt_EOF);
         return token;
     }
 
-    uint8_t b;
-    if (is_whitespace((uint8_t)code)) {
-        code = skip_whitespace(s);
-        if (code == text_eof) {
-            token = create_token(s->line, s->column, tt_EOF);
-            return token;
-        }
+    skip_whitespace(s);
+    if (s->code == ReaderEOF) {
+        token = create_token_at_scanner_position(s, tt_EOF);
+        return token;
     }
-    b = (uint8_t)advance_scanner(s);
 
-    // bool insert_semi = false;
-
-    if (is_letter_or_underscore(b)) {
+    if (is_letter_or_underscore((uint8_t)s->code)) {
         token = scan_name(s);
         return token;
     }
 
-    if (is_decimal_digit(b)) {
+    if (is_decimal_digit((uint8_t)s->code)) {
         token = scan_number(s);
         return token;
     }
 
-    if (b == '"') {
+    if (s->code == '"') {
         token = scan_string_literal(s);
         return token;
     }
 
-    if (b == '/') {
-        code = peek(s);
-        if (code == '/') {
-            token = scan_line_comment(s);
-            return token;
-        }
+    if (s->code == '/' && s->next_code == '/') {
+        token = scan_line_comment(s);
+        return token;
     }
 
-    if (b == '\'') {
+    if (s->code == '\'') {
         token = scan_character_literal(s);
         return token;
     }
@@ -544,7 +535,6 @@ Token scan_next_token(Scanner *s) {
     return token;
 }
 
-void free_scanner(Scanner *s) {
-    free_source(s->source);
-    free(s);
+void free_scanner(Scanner s) {
+    free_str_byte_reader(s.reader);
 }

@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 
+#include "position.h"
 #include "str.h"
 
 typedef enum TokenType TokenType;
@@ -116,8 +117,7 @@ enum TokenType {
 
 struct Token {
     TokenType type;
-    uint32_t line;
-    uint32_t column;
+    Position pos;
     str literal;
 };
 
@@ -126,8 +126,8 @@ struct KeywordLookupResult {
     TokenType type;
 };
 
-Token create_token(uint32_t line, uint32_t column, TokenType type);
-Token create_token_with_literal(uint32_t line, uint32_t column, TokenType type, str literal);
+Token create_token(TokenType type, Position pos);
+Token create_token_with_literal(TokenType type, Position pos, str literal);
 KeywordLookupResult lookup_keyword(str s);
 void print_token(Token token);
 void free_token(Token token);

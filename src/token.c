@@ -82,21 +82,19 @@ str get_token_literal(Token token) {
     return token.literal;
 }
 
-Token create_token_with_literal(uint32_t line, uint32_t column, TokenType type, str literal) {
+Token create_token_with_literal(TokenType type, Position pos, str literal) {
     Token token = {
-        .line    = line,
-        .column  = column,
         .type    = type,
+        .pos     = pos,
         .literal = literal,
     };
     return token;
 }
 
-Token create_token(uint32_t line, uint32_t column, TokenType type) {
+Token create_token(TokenType type, Position pos) {
     Token token = {
-        .line   = line,
-        .column = column,
-        .type   = type,
+        .type = type,
+        .pos  = pos,
     };
     return token;
 }
@@ -125,8 +123,8 @@ KeywordLookupResult lookup_keyword(str s) {
 void print_token(Token token) {
     str literal    = get_token_literal(token);
     str type_str   = format_uint32_decimal(token.type);
-    str line_str   = format_uint32_decimal(token.line);
-    str column_str = format_uint32_decimal(token.column);
+    str line_str   = format_uint32_decimal(token.pos.line);
+    str column_str = format_uint32_decimal(token.pos.column);
 
     fwrite(line_str.bytes, 1, line_str.len, stdout);
     fwrite(":", 1, 1, stdout);

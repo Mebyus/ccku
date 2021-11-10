@@ -18,7 +18,7 @@ CFLAGS = -Wall -Wextra -Wconversion -Werror -std=c${CSTANDARD} -O${OPTIMIZATION}
 
 ${BINPATH}: ${OBJDIR}/cmd.o ${OBJDIR}/source.o ${OBJDIR}/scanner.o \
 ${OBJDIR}/token.o ${OBJDIR}/str.o ${OBJDIR}/fatal.o ${OBJDIR}/slice.o \
-${OBJDIR}/ast.o ${OBJDIR}/parser.o
+${OBJDIR}/ast.o ${OBJDIR}/parser.o ${OBJDIR}/byte_reader.o ${OBJDIR}/position.o
 	${CC} -o $@ $^
 
 ${OBJDIR}/cmd.o: ${SRCDIR}/cmd.c
@@ -40,6 +40,14 @@ ${OBJDIR}/token.o: ${SRCDIR}/token.c
 ${OBJDIR}/str.o: ${SRCDIR}/str.c
 	${CC} ${CPPFLAGS} ${DEPDIR}/str.d ${CFLAGS} -o $@ -c $<
 -include ${DEPDIR}/str.d
+
+${OBJDIR}/byte_reader.o: ${SRCDIR}/byte_reader.c
+	${CC} ${CPPFLAGS} ${DEPDIR}/byte_reader.d ${CFLAGS} -o $@ -c $<
+-include ${DEPDIR}/byte_reader.d
+
+${OBJDIR}/position.o: ${SRCDIR}/position.c
+	${CC} ${CPPFLAGS} ${DEPDIR}/position.d ${CFLAGS} -o $@ -c $<
+-include ${DEPDIR}/position.d
 
 ${OBJDIR}/slice.o: ${SRCDIR}/slice.c
 	${CC} ${CPPFLAGS} ${DEPDIR}/slice.d ${CFLAGS} -o $@ -c $<

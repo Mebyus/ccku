@@ -3,34 +3,38 @@
 
 #include <stdbool.h>
 
+#include "byte_reader.h"
+#include "position.h"
 #include "source.h"
 #include "token.h"
 
 typedef struct Scanner Scanner;
 
 struct Scanner {
-    SourceText source;
+    bool prefetched;
 
-    // Shortcut for source.text
-    str text;
+    int backup_code;
+    int prev_code;
+    int code;
+    int next_code;
+    int prefetched_code;
 
-    // Scanner positioning
-    bool started;
-    uint64_t pos;
-    uint32_t line;
-    uint32_t column;
+    Position prev_pos;
+    Position pos;
 
-    // Last read byte
-    uint8_t prev_byte;
-    bool insert_semi;
+    StrByteReader reader;
 };
 
 Scanner *new_scanner_from_str(str s);
 Scanner *new_scanner_from_source(SourceText source);
 Scanner *new_scanner_from_file(char *path);
 
-Token scan_next_token(Scanner *s);
+Scanner init_scanner_from_str(str s);
+Scanner init_scanner_from_source(SourceText source);
+Scanner init_scanner_from_file(char *path);
 
-void free_scanner(Scanner *s);
+Token scan_token(Scanner *s);
+
+void free_scanner(Scanner s);
 
 #endif // KU_SCANNER_H

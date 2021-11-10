@@ -21,6 +21,7 @@ str new_str_from_buf(char *buf, uint64_t size);
 str new_str_from_bytes(uint8_t *bytes, uint64_t size);
 str new_str_from_byte(uint8_t b);
 str new_str_slice(str s, uint64_t start, uint64_t end);
+str new_str_slice_to_end(str s, uint64_t start);
 str take_str_from_cstr(char *s);
 str take_str_from_buf(char *buf, uint64_t size);
 str take_str_from_bytes(uint8_t *bytes, uint64_t size);

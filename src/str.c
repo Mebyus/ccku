@@ -92,6 +92,10 @@ str new_str_slice(str s, uint64_t start, uint64_t end) {
     return new_str_from_bytes(s.bytes + start, end - start);
 }
 
+str new_str_slice_to_end(str s, uint64_t start) {
+    return new_str_slice(s, start, s.len);
+}
+
 str take_str_from_buf(char *buf, uint64_t size) {
     str s = {
         .is_owner = true,
