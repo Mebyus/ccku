@@ -1,6 +1,6 @@
 #include "ast.h"
 
-Statement get_empty_statement() {
+Statement init_empty_statement() {
     Statement stmt = {
         .type = st_Empty,
         .ptr  = NULL,
@@ -8,7 +8,7 @@ Statement get_empty_statement() {
     return stmt;
 }
 
-Statement get_define_statement(slice_of_Expressions left, slice_of_Expressions right) {
+Statement init_define_statement(slice_of_Expressions left, slice_of_Expressions right) {
     DefineStatement *dstmt = (DefineStatement *)malloc(sizeof(DefineStatement));
     if (dstmt == NULL) {
         fatal(1, "not enough memory for new define statement");
@@ -23,7 +23,7 @@ Statement get_define_statement(slice_of_Expressions left, slice_of_Expressions r
     return stmt;
 }
 
-Statement get_expression_statement(Expression expr) {
+Statement init_expression_statement(Expression expr) {
     Expression *new_expr = (Expression *)malloc(sizeof(Expression));
     if (new_expr == NULL) {
         fatal(1, "not enough memory for new define statement");
@@ -37,7 +37,7 @@ Statement get_expression_statement(Expression expr) {
     return stmt;
 }
 
-Expression get_identifier_expression(Token token) {
+Expression init_identifier_expression(Token token) {
     Identifier *ident = (Identifier *)malloc(sizeof(Identifier));
     if (ident == NULL) {
         fatal(1, "not enough memory for new identifier expression");
@@ -51,7 +51,35 @@ Expression get_identifier_expression(Token token) {
     return expr;
 }
 
-Expression get_call_expression(Token name_token, slice_of_Expressions args) {
+Expression init_integer_expression(Token token) {
+    Integer *literal = (Integer *)malloc(sizeof(Integer));
+    if (literal == NULL) {
+        fatal(1, "not enough memory for new integer literal expression");
+    }
+    literal->token = token;
+
+    Expression expr = {
+        .type = et_IntegerLiteral,
+        .ptr  = literal,
+    };
+    return expr;
+}
+
+Expression init_string_expression(Token token) {
+    String *literal = (String *)malloc(sizeof(String));
+    if (literal == NULL) {
+        fatal(1, "not enough memory for new string literal expression");
+    }
+    literal->token = token;
+
+    Expression expr = {
+        .type = et_StringLiteral,
+        .ptr  = literal,
+    };
+    return expr;
+}
+
+Expression init_call_expression(Token name_token, slice_of_Expressions args) {
     CallExpression *cexpr = (CallExpression *)malloc(sizeof(CallExpression));
     if (cexpr == NULL) {
         fatal(1, "not enough memory for new call expression");

@@ -55,6 +55,8 @@ typedef struct Expression Expression;
 typedef struct CallExpression CallExpression;
 typedef struct CallArgument CallArgument;
 typedef struct Identifier Identifier;
+typedef struct Integer Integer;
+typedef struct String String;
 
 TYPEDEF_SLICE(Statement)
 TYPEDEF_SLICE(Expression)
@@ -76,9 +78,10 @@ enum StatementType {
 };
 
 enum ExpressionType {
-    et_Call,
-    et_StringLiteral,
     et_Identifier,
+    et_Call,
+    et_IntegerLiteral,
+    et_StringLiteral,
 };
 
 struct Statement {
@@ -99,6 +102,14 @@ struct Identifier {
     str name;
 };
 
+struct Integer {
+    Token token;
+};
+
+struct String {
+    Token token;
+};
+
 struct CallExpression {
     str function_name;
     slice_of_Expressions args;
@@ -108,11 +119,13 @@ struct CallArgument {
     Expression expression;
 };
 
-Statement get_empty_statement();
-Statement get_define_statement(slice_of_Expressions left, slice_of_Expressions right);
-Statement get_expression_statement(Expression expr);
+Statement init_empty_statement();
+Statement init_define_statement(slice_of_Expressions left, slice_of_Expressions right);
+Statement init_expression_statement(Expression expr);
 
-Expression get_identifier_expression(Token token);
-Expression get_call_expression(Token name_token, slice_of_Expressions args);
+Expression init_identifier_expression(Token token);
+Expression init_integer_expression(Token token);
+Expression init_call_expression(Token name_token, slice_of_Expressions args);
+Expression init_string_expression(Token token);
 
 #endif // KU_STATEMENT_H

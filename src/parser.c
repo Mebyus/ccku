@@ -1,5 +1,8 @@
 #include "parser.h"
 
+#define ENABLE_DEBUG 1
+#include "debug.h"
+
 Token get_next_token(Parser *p) {
     Token token;
     if (p->prefetched) {
@@ -7,23 +10,23 @@ Token get_next_token(Parser *p) {
         token         = p->prefetched_token;
     } else {
         token = scan_next_token(p->scanner);
-        print_token(token); // [DEBUG]
+        DEBUG(print_token(token);)
     }
     return token;
 }
 
-void advance(Parser *p) {
+void advance_parser(Parser *p) {
     p->prev_token = p->token;
     p->token      = p->next_token;
     p->next_token = get_next_token(p);
 }
 
-void advance_backup(Parser *p) {
+void backup_advance_parser(Parser *p) {
     p->backup_token = p->prev_token;
-    advance(p);
+    advance_parser(p);
 }
 
-void step_back(Parser *p) {
+void step_back_parser(Parser *p) {
     p->prefetched       = true;
     p->prefetched_token = p->next_token;
     p->next_token       = p->token;
@@ -31,39 +34,63 @@ void step_back(Parser *p) {
     p->prev_token       = p->backup_token;
 }
 
-Expression parse_expression(Parser *p) {}
+void skip_comments(Parser *p) {
+    do {
+        advance_parser(p);
+    } while (p->token.type == tt_Comment);
+}
+
+Expression parse_expression(Parser *p) {
+    Expression expr;
+    if (p->token.type == tt_Identifier) {
+        expr = init_identifier_expression(p->token);
+        advance_parser(p);
+        return expr;
+    }
+    if (p->token.type == tt_Integer) {
+        expr = init_integer_expression(p->token);
+        advance_parser(p);
+        return expr;
+    }
+    if (p->token.type == tt_String) {
+        expr = init_string_expression(p->token);
+        advance_parser(p);
+        return expr;
+    }
+    return parse_expression(p);
+}
 
 Statement parse_define_statement(Parser *p) {
     slice_of_Expressions left = new_null_slice_of_Expressions();
-    append_Expression_to_slice(&left, get_identifier_expression(p->prev_token));
+    append_Expression_to_slice(&left, parse_expression(p));
 
-    advance(p); // swallow ":=" token
-    advance(p);
+    advance_parser(p); // consume ":=" token
+
     slice_of_Expressions right = new_null_slice_of_Expressions();
-    append_Expression_to_slice(&right, get_identifier_expression(p->token));
+    append_Expression_to_slice(&right, parse_expression(p));
 
-    advance(p); // swallow ";" token
+    advance_parser(p); // consume ";" token
 
-    return get_define_statement(left, right);
+    return init_define_statement(left, right);
 }
 
 Statement parse_call_statement(Parser *p) {
-    Token name_token = p->prev_token;
+    Token name_token = p->token;
 
-    advance(p); // swallow "(" token
+    advance_parser(p); // consume identifier token
+    advance_parser(p); // consume "(" token
 
     slice_of_Expressions args = new_null_slice_of_Expressions();
 
     append_Expression_to_slice(&args, parse_expression(p));
 
-    advance(p); // swallow ")" token
-    advance(p); // swallow ";" token
+    advance_parser(p); // consume ")" token
+    advance_parser(p); // consume ";" token
 
-    return get_expression_statement(get_call_expression(name_token, args));
+    return init_expression_statement(init_call_expression(name_token, args));
 }
 
 Statement parse_statement(Parser *p) {
-    advance(p);
     switch (p->token.type) {
     case tt_Identifier:
         if (p->next_token.type == tt_Define) {
@@ -73,10 +100,13 @@ Statement parse_statement(Parser *p) {
             return parse_call_statement(p);
         }
         break;
+    case tt_Comment:
+        skip_comments(p);
+        break;
     default:
         break;
     }
-    return get_empty_statement();
+    return init_empty_statement();
 }
 
 slice_of_Statements parse_source(SourceText source) {
@@ -90,11 +120,13 @@ slice_of_Statements parse_source(SourceText source) {
 
 slice_of_Statements parse(Parser *p) {
     slice_of_Statements s = new_null_slice_of_Statements();
-    do {
+    advance_parser(p);
+    advance_parser(p);
+    while (p->token.type != tt_EOF) {
         Statement stmt = parse_statement(p);
         if (stmt.type != st_Empty) {
             append_Statement_to_slice(&s, stmt);
         }
-    } while (p->prev_token.type != tt_EOF);
+    }
     return s;
 }

@@ -59,7 +59,7 @@ bool is_whitespace(uint8_t b) {
     return b == ' ' || b == '\n' || b == '\t' || b == '\r';
 }
 
-int advance(Scanner *s) {
+int advance_scanner(Scanner *s) {
     if (s->pos >= s->text.len) {
         return text_eof;
     }
@@ -86,7 +86,7 @@ int peek(Scanner *s) {
     return text_eof;
 }
 
-uint8_t step_back(Scanner *s) {
+uint8_t step_back_scanner(Scanner *s) {
     s->pos--;
     if (s->prev_byte == '\n') {
         s->line--;
@@ -98,14 +98,14 @@ uint8_t step_back(Scanner *s) {
 int skip_whitespace(Scanner *s) {
     int code;
     do {
-        code = advance(s);
+        code = advance_scanner(s);
     } while (code != text_eof && is_whitespace((uint8_t)code));
 
     if (code == text_eof) {
         return text_eof;
     }
 
-    return step_back(s);
+    return step_back_scanner(s);
 }
 
 Token scan_illegal_word(Scanner *s) {
@@ -118,11 +118,11 @@ Token scan_illegal_word(Scanner *s) {
 
     int code;
     do {
-        code = advance(s);
+        code = advance_scanner(s);
     } while (code != text_eof && is_alphanum((uint8_t)code));
 
     if (code != text_eof) {
-        step_back(s);
+        step_back_scanner(s);
     }
 
     uint64_t end_pos = s->pos;
@@ -143,11 +143,11 @@ Token scan_name(Scanner *s) {
 
     int code;
     do {
-        code = advance(s);
+        code = advance_scanner(s);
     } while (code != text_eof && is_alphanum((uint8_t)code));
 
     if (code != text_eof) {
-        step_back(s);
+        step_back_scanner(s);
     }
 
     uint64_t end_pos = s->pos;
@@ -172,15 +172,15 @@ Token scan_binary_number(Scanner *s) {
         .column = s->column - 1,
     };
 
-    advance(s); // skip 'b' before the digits
+    advance_scanner(s); // skip 'b' before the digits
 
     int code;
     do {
-        code = advance(s);
+        code = advance_scanner(s);
     } while (code != text_eof && is_binary_digit((uint8_t)code));
 
     if (code != text_eof) {
-        step_back(s);
+        step_back_scanner(s);
     }
 
     uint64_t end_pos = s->pos;
@@ -199,15 +199,15 @@ Token scan_octal_number(Scanner *s) {
         .column = s->column - 1,
     };
 
-    advance(s); // skip 'o' before the digits
+    advance_scanner(s); // skip 'o' before the digits
 
     int code;
     do {
-        code = advance(s);
+        code = advance_scanner(s);
     } while (code != text_eof && is_octal_digit((uint8_t)code));
 
     if (code != text_eof) {
-        step_back(s);
+        step_back_scanner(s);
     }
 
     uint64_t end_pos = s->pos;
@@ -228,11 +228,11 @@ Token scan_decimal_number(Scanner *s) {
 
     int code;
     do {
-        code = advance(s);
+        code = advance_scanner(s);
     } while (code != text_eof && is_decimal_digit((uint8_t)code));
 
     if (code != text_eof) {
-        step_back(s);
+        step_back_scanner(s);
     }
 
     uint64_t end_pos = s->pos;
@@ -251,15 +251,15 @@ Token scan_hexadecimal_number(Scanner *s) {
         .column = s->column - 1,
     };
 
-    advance(s); // skip 'x' before the digits
+    advance_scanner(s); // skip 'x' before the digits
 
     int code;
     do {
-        code = advance(s);
+        code = advance_scanner(s);
     } while (code != text_eof && is_hexadecimal_digit((uint8_t)code));
 
     if (code != text_eof) {
-        step_back(s);
+        step_back_scanner(s);
     }
 
     uint64_t end_pos = s->pos;
@@ -323,7 +323,7 @@ Token scan_string_literal(Scanner *s) {
     do {
         skip_qoute = false;
 
-        code = advance(s);
+        code = advance_scanner(s);
         if (!escaped && code == '\\') {
             escaped = true;
         } else if (escaped) {
@@ -348,11 +348,11 @@ Token scan_line_comment(Scanner *s) {
         .column = s->column - 1,
     };
 
-    advance(s); // skip '/' before the actual comment
+    advance_scanner(s); // skip '/' before the actual comment
 
     int code;
     do {
-        code = advance(s);
+        code = advance_scanner(s);
     } while (code != text_eof && code != '\n');
 
     uint64_t end_pos = s->pos - 1;
@@ -373,7 +373,7 @@ Token scan_character_literal(Scanner *s) {
 
     int code;
     do {
-        code = advance(s);
+        code = advance_scanner(s);
     } while (code != text_eof && code != '\'');
 
     uint64_t end_pos = s->pos;
@@ -392,7 +392,7 @@ Token scan_colon_start(Scanner *s) {
 
     int code = peek(s);
     if (code == '=') {
-        advance(s);
+        advance_scanner(s);
         token.type = tt_Define;
     } else {
         token.type = tt_Colon;
@@ -409,10 +409,10 @@ Token scan_plus_start(Scanner *s) {
 
     int code = peek(s);
     if (code == '=') {
-        advance(s);
+        advance_scanner(s);
         token.type = tt_AddAssign;
     } else if (code == '+') {
-        advance(s);
+        advance_scanner(s);
         token.type = tt_Increment;
     } else {
         token.type = tt_Plus;
@@ -508,7 +508,7 @@ Token scan_next_token(Scanner *s) {
             return token;
         }
     }
-    b = (uint8_t)advance(s);
+    b = (uint8_t)advance_scanner(s);
 
     // bool insert_semi = false;
 
