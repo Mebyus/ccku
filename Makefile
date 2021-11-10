@@ -18,7 +18,8 @@ CFLAGS = -Wall -Wextra -Wconversion -Werror -std=c${CSTANDARD} -O${OPTIMIZATION}
 
 ${BINPATH}: ${OBJDIR}/cmd.o ${OBJDIR}/source.o ${OBJDIR}/scanner.o \
 ${OBJDIR}/token.o ${OBJDIR}/str.o ${OBJDIR}/fatal.o ${OBJDIR}/slice.o \
-${OBJDIR}/ast.o ${OBJDIR}/parser.o ${OBJDIR}/byte_reader.o ${OBJDIR}/position.o
+${OBJDIR}/ast.o ${OBJDIR}/parser.o ${OBJDIR}/byte_reader.o ${OBJDIR}/position.o \
+${OBJDIR}/charset.o
 	${CC} -o $@ $^
 
 ${OBJDIR}/cmd.o: ${SRCDIR}/cmd.c
@@ -64,6 +65,10 @@ ${OBJDIR}/parser.o: ${SRCDIR}/parser.c
 ${OBJDIR}/fatal.o: ${SRCDIR}/fatal.c
 	${CC} ${CPPFLAGS} ${DEPDIR}/fatal.d ${CFLAGS} -o $@ -c $<
 -include ${DEPDIR}/fatal.d
+
+${OBJDIR}/charset.o: ${SRCDIR}/charset.c
+	${CC} ${CPPFLAGS} ${DEPDIR}/charset.d ${CFLAGS} -o $@ -c $<
+-include ${DEPDIR}/charset.d
 
 .PHONY: clean
 clean:

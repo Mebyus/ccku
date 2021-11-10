@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "charset.h"
 #include "fatal.h"
 #include "str.h"
 
@@ -73,19 +74,7 @@ str new_str_from_bytes(uint8_t *bytes, uint64_t size) {
 }
 
 str new_str_from_byte(uint8_t b) {
-    uint8_t *bytes = (uint8_t *)malloc(1);
-    if (bytes == NULL) {
-        fatal(1, "not enough memory for new string");
-    }
-
-    bytes[0] = b;
-
-    str s = {
-        .is_owner = true,
-        .bytes    = bytes,
-        .len      = 1,
-    };
-    return s;
+    return borrow_str_from_bytes(charset_bytes + b, 1);
 }
 
 str new_str_slice(str s, uint64_t start, uint64_t end) {
