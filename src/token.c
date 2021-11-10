@@ -71,8 +71,7 @@ str token_type_str[] = {
 };
 
 bool has_static_literal(TokenType type) {
-    return type != tt_Comment && type != tt_Identifier && type != tt_Integer && type != tt_Float &&
-           type != tt_Character && type != tt_String && type != tt_Illegal;
+    return type > tt_end_no_static_literal;
 }
 
 str get_token_literal(Token token) {

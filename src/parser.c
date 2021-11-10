@@ -50,7 +50,7 @@ Expression parse_expression(Parser *p) {
         DEBUG(printf("identifier expression\n");)
         return expr;
     }
-    if (p->token.type == tt_Integer) {
+    if (p->token.type == tt_DecimalInteger) {
         expr = init_integer_expression(p->token);
         advance_parser(p);
         DEBUG(printf("integer expression\n");)

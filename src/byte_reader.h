@@ -3,8 +3,8 @@
 
 #include "str.h"
 
-const int ReaderBOF = -1;
-const int ReaderEOF = -2;
+extern const int ReaderBOF;
+extern const int ReaderEOF;
 
 typedef struct StrByteReader StrByteReader;
 

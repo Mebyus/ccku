@@ -11,26 +11,31 @@ typedef struct Token Token;
 typedef struct KeywordLookupResult KeywordLookupResult;
 
 enum TokenType {
-    // Special tokens
-    tt_Illegal,
-    tt_EOF,
-    tt_Comment,
+    tt_begin_no_static_literal,
+
+    tt_Illegal, // any byte sequence unknown to scanner
+    tt_Comment, // only line comments are supported
 
     // Identifiers and basic type literal classes
-    tt_BlankIdentifier, // _
-    tt_Identifier,      // e.g: myvar, main, Line, println
-    tt_Integer,         // e.g: 5367, 43_432, 1_000_097
-    tt_Float,           // e.g: 123.45
-    tt_Character,       // e.g: 'a', '\t', 'p'
-    tt_String,          // e.g: "abc", "", "\t\n  42Hello\n"
+    tt_Identifier,         // e.g: myvar, main, Line, println
+    tt_BinaryInteger,      // e.g: 0b1101100001
+    tt_OctalInteger,       // e.g: 0o43671
+    tt_DecimalInteger,     // e.g: 5367, 43_432, 1_000_097
+    tt_HexadecimalInteger, // e.g: 0x43da1
+    tt_Float,              // e.g: 123.45
+    tt_Character,          // e.g: 'a', '\t', 'p'
+    tt_String,             // e.g: "abc", "", "\t\n  42Hello\n"
+
+    tt_end_no_static_literal,
 
     // Operators and/or punctuators
-    tt_Plus,      // +
-    tt_Minus,     // -
-    tt_Asterisk,  // *
-    tt_Slash,     // /
-    tt_Percent,   // %
-    tt_Ampersand, // &
+    tt_BlankIdentifier, // _
+    tt_Plus,            // +
+    tt_Minus,           // -
+    tt_Asterisk,        // *
+    tt_Slash,           // /
+    tt_Percent,         // %
+    tt_Ampersand,       // &
 
     tt_Pipe,          // |
     tt_Caret,         // ^
@@ -112,6 +117,9 @@ enum TokenType {
     tt_Public,
 
     tt_end_keyword,
+
+    // Special tokens
+    tt_EOF,
 };
 
 
