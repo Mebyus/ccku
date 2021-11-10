@@ -62,7 +62,7 @@ Scanner *new_scanner_from_source(SourceText source) {
     s->prev_code  = ReaderBOF;
     s->code       = ReaderBOF;
     s->next_code  = ReaderBOF;
-    s->reader     = init_str_byte_reader(source.text);
+    s->reader     = init_str_byte_reader(source.text, scanner_buffer_size);
     init_scanner_buffer(s);
     return s;
 }
@@ -78,7 +78,7 @@ Scanner init_scanner_from_source(SourceText source) {
         .prev_code  = ReaderBOF,
         .code       = ReaderBOF,
         .next_code  = ReaderBOF,
-        .reader     = init_str_byte_reader(source.text),
+        .reader     = init_str_byte_reader(source.text, scanner_buffer_size),
     };
     init_scanner_buffer(&s);
     return s;
@@ -91,7 +91,7 @@ Scanner init_scanner_from_str(str string) {
         .prev_code  = ReaderBOF,
         .code       = ReaderBOF,
         .next_code  = ReaderBOF,
-        .reader     = init_str_byte_reader(string),
+        .reader     = init_str_byte_reader(string, scanner_buffer_size),
     };
     init_scanner_buffer(&s);
     return s;
@@ -151,18 +151,9 @@ Token scan_illegal_word(Scanner *s) {
         .type = tt_Illegal,
         .pos  = s->pos,
     };
-    uint64_t reader_start_pos = s->reader.pos - scanner_buffer_size;
-
+    mark_str_byte_reader_position(&s->reader);
     consume_word(s);
-
-    if (s->code == ReaderEOF) {
-        token.literal = new_str_slice_to_end(s->reader.s, reader_start_pos);
-        return token;
-    }
-
-    uint64_t reader_end_pos = s->reader.pos - scanner_buffer_size;
-    token.literal           = new_str_slice(s->reader.s, reader_start_pos, reader_end_pos);
-
+    token.literal = slice_from_str_byte_reader_mark(&s->reader);
     return token;
 }
 
@@ -170,16 +161,9 @@ Token scan_name(Scanner *s) {
     Token token = {
         .pos = s->pos,
     };
-    uint64_t reader_start_pos = s->reader.pos - scanner_buffer_size;
-
+    mark_str_byte_reader_position(&s->reader);
     consume_word(s);
-
-    if (s->code == ReaderEOF) {
-        token.literal = new_str_slice_to_end(s->reader.s, reader_start_pos);
-    } else {
-        uint64_t reader_end_pos = s->reader.pos - scanner_buffer_size;
-        token.literal           = new_str_slice(s->reader.s, reader_start_pos, reader_end_pos);
-    }
+    token.literal = slice_from_str_byte_reader_mark(&s->reader);
 
     KeywordLookupResult keyword_lookup_result = lookup_keyword(token.literal);
     if (keyword_lookup_result.found) {
@@ -195,7 +179,7 @@ Token scan_binary_number(Scanner *s) {
     Token token = {
         .pos = s->pos,
     };
-    uint64_t reader_start_pos = s->reader.pos - scanner_buffer_size;
+    mark_str_byte_reader_position(&s->reader);
 
     advance_scanner(s); // skip '0' byte
     advance_scanner(s); // skip 'b' byte
@@ -204,28 +188,15 @@ Token scan_binary_number(Scanner *s) {
         advance_scanner(s);
     } while (s->code != ReaderEOF && is_binary_digit((uint8_t)s->code));
 
-    if (s->code == ReaderEOF) {
-        token.literal = new_str_slice_to_end(s->reader.s, reader_start_pos);
-        token.type    = tt_BinaryInteger;
-        return token;
-    } else if (is_alphanum((uint8_t)s->code)) {
-        token.type = tt_Illegal;
+    if (is_alphanum((uint8_t)s->code)) {
         consume_word(s);
-
-        if (s->code == ReaderEOF) {
-            token.literal = new_str_slice_to_end(s->reader.s, reader_start_pos);
-            return token;
-        }
-
-        uint64_t reader_end_pos = s->reader.pos - scanner_buffer_size;
-        token.literal           = new_str_slice(s->reader.s, reader_start_pos, reader_end_pos);
+        token.type    = tt_Illegal;
+        token.literal = slice_from_str_byte_reader_mark(&s->reader);
         return token;
     }
 
-    uint64_t reader_end_pos = s->reader.pos - scanner_buffer_size;
-    token.literal           = new_str_slice(s->reader.s, reader_start_pos, reader_end_pos);
-    token.type              = tt_BinaryInteger;
-
+    token.type    = tt_BinaryInteger;
+    token.literal = slice_from_str_byte_reader_mark(&s->reader);
     return token;
 }
 
@@ -233,7 +204,7 @@ Token scan_octal_number(Scanner *s) {
     Token token = {
         .pos = s->pos,
     };
-    uint64_t reader_start_pos = s->reader.pos - scanner_buffer_size;
+    mark_str_byte_reader_position(&s->reader);
 
     advance_scanner(s); // skip '0' byte
     advance_scanner(s); // skip 'o' byte
@@ -242,28 +213,15 @@ Token scan_octal_number(Scanner *s) {
         advance_scanner(s);
     } while (s->code != ReaderEOF && is_octal_digit((uint8_t)s->code));
 
-    if (s->code == ReaderEOF) {
-        token.literal = new_str_slice_to_end(s->reader.s, reader_start_pos);
-        token.type    = tt_OctalInteger;
-        return token;
-    } else if (is_alphanum((uint8_t)s->code)) {
-        token.type = tt_Illegal;
+    if (is_alphanum((uint8_t)s->code)) {
         consume_word(s);
-
-        if (s->code == ReaderEOF) {
-            token.literal = new_str_slice_to_end(s->reader.s, reader_start_pos);
-            return token;
-        }
-
-        uint64_t reader_end_pos = s->reader.pos - scanner_buffer_size;
-        token.literal           = new_str_slice(s->reader.s, reader_start_pos, reader_end_pos);
+        token.type    = tt_Illegal;
+        token.literal = slice_from_str_byte_reader_mark(&s->reader);
         return token;
     }
 
-    uint64_t reader_end_pos = s->reader.pos - scanner_buffer_size;
-    token.literal           = new_str_slice(s->reader.s, reader_start_pos, reader_end_pos);
-    token.type              = tt_OctalInteger;
-
+    token.type    = tt_OctalInteger;
+    token.literal = slice_from_str_byte_reader_mark(&s->reader);
     return token;
 }
 
@@ -271,34 +229,21 @@ Token scan_decimal_number(Scanner *s) {
     Token token = {
         .pos = s->pos,
     };
-    uint64_t reader_start_pos = s->reader.pos - scanner_buffer_size;
+    mark_str_byte_reader_position(&s->reader);
 
     do {
         advance_scanner(s);
     } while (s->code != ReaderEOF && is_decimal_digit((uint8_t)s->code));
 
-    if (s->code == ReaderEOF) {
-        token.literal = new_str_slice_to_end(s->reader.s, reader_start_pos);
-        token.type    = tt_DecimalInteger;
-        return token;
-    } else if (is_alphanum((uint8_t)s->code)) {
-        token.type = tt_Illegal;
+    if (is_alphanum((uint8_t)s->code)) {
         consume_word(s);
-
-        if (s->code == ReaderEOF) {
-            token.literal = new_str_slice_to_end(s->reader.s, reader_start_pos);
-            return token;
-        }
-
-        uint64_t reader_end_pos = s->reader.pos - scanner_buffer_size;
-        token.literal           = new_str_slice(s->reader.s, reader_start_pos, reader_end_pos);
+        token.type    = tt_Illegal;
+        token.literal = slice_from_str_byte_reader_mark(&s->reader);
         return token;
     }
 
-    uint64_t reader_end_pos = s->reader.pos - scanner_buffer_size;
-    token.literal           = new_str_slice(s->reader.s, reader_start_pos, reader_end_pos);
-    token.type              = tt_DecimalInteger;
-
+    token.type    = tt_DecimalInteger;
+    token.literal = slice_from_str_byte_reader_mark(&s->reader);
     return token;
 }
 
@@ -306,7 +251,7 @@ Token scan_hexadecimal_number(Scanner *s) {
     Token token = {
         .pos = s->pos,
     };
-    uint64_t reader_start_pos = s->reader.pos - scanner_buffer_size;
+    mark_str_byte_reader_position(&s->reader);
 
     advance_scanner(s); // skip '0' byte
     advance_scanner(s); // skip 'x' byte
@@ -315,28 +260,15 @@ Token scan_hexadecimal_number(Scanner *s) {
         advance_scanner(s);
     } while (s->code != ReaderEOF && is_hexadecimal_digit((uint8_t)s->code));
 
-    if (s->code == ReaderEOF) {
-        token.literal = new_str_slice_to_end(s->reader.s, reader_start_pos);
-        token.type    = tt_HexadecimalInteger;
-        return token;
-    } else if (is_alphanum((uint8_t)s->code)) {
-        token.type = tt_Illegal;
+    if (is_alphanum((uint8_t)s->code)) {
         consume_word(s);
-
-        if (s->code == ReaderEOF) {
-            token.literal = new_str_slice_to_end(s->reader.s, reader_start_pos);
-            return token;
-        }
-
-        uint64_t reader_end_pos = s->reader.pos - scanner_buffer_size;
-        token.literal           = new_str_slice(s->reader.s, reader_start_pos, reader_end_pos);
+        token.type    = tt_Illegal;
+        token.literal = slice_from_str_byte_reader_mark(&s->reader);
         return token;
     }
 
-    uint64_t reader_end_pos = s->reader.pos - scanner_buffer_size;
-    token.literal           = new_str_slice(s->reader.s, reader_start_pos, reader_end_pos);
-    token.type              = tt_HexadecimalInteger;
-
+    token.type    = tt_HexadecimalInteger;
+    token.literal = slice_from_str_byte_reader_mark(&s->reader);
     return token;
 }
 
@@ -382,22 +314,21 @@ Token scan_string_literal(Scanner *s) {
     Token token = {
         .pos = s->pos,
     };
-    uint64_t reader_start_pos = s->reader.pos - scanner_buffer_size;
+    mark_str_byte_reader_position(&s->reader);
 
     do {
         advance_scanner(s);
     } while (s->code != ReaderEOF && (s->code != '"' || s->prev_code == '\\'));
 
     if (s->code != '"') {
-        token.literal = new_str_slice_to_end(s->reader.s, reader_start_pos);
         token.type    = tt_Illegal;
+        token.literal = slice_from_str_byte_reader_mark(&s->reader);
         return token;
     }
 
     advance_scanner(s);
-    uint64_t reader_end_pos = s->reader.pos - scanner_buffer_size;
-    token.literal           = new_str_slice(s->reader.s, reader_start_pos, reader_end_pos);
-    token.type              = tt_String;
+    token.type    = tt_String;
+    token.literal = slice_from_str_byte_reader_mark(&s->reader);
 
     return token;
 }
@@ -407,21 +338,17 @@ Token scan_line_comment(Scanner *s) {
         .type = tt_Comment,
         .pos  = s->pos,
     };
-    uint64_t reader_start_pos = s->reader.pos - scanner_buffer_size;
+    mark_str_byte_reader_position(&s->reader);
 
     do {
         advance_scanner(s);
     } while (s->code != ReaderEOF && s->code != '\n');
 
+    token.literal = slice_from_str_byte_reader_mark(&s->reader);
     if (s->code != '\n') {
-        token.literal = new_str_slice_to_end(s->reader.s, reader_start_pos);
         return token;
     }
-
-    uint64_t reader_end_pos = s->reader.pos - scanner_buffer_size;
-    token.literal           = new_str_slice(s->reader.s, reader_start_pos, reader_end_pos);
     advance_scanner(s);
-
     return token;
 }
 
@@ -429,23 +356,21 @@ Token scan_character_literal(Scanner *s) {
     Token token = {
         .pos = s->pos,
     };
-    uint64_t reader_start_pos = s->reader.pos - scanner_buffer_size;
+    mark_str_byte_reader_position(&s->reader);
 
     do {
         advance_scanner(s);
     } while (s->code != ReaderEOF && s->code != '\'');
 
     if (s->code != '\'') {
-        token.literal = new_str_slice_to_end(s->reader.s, reader_start_pos);
         token.type    = tt_Illegal;
+        token.literal = slice_from_str_byte_reader_mark(&s->reader);
         return token;
     }
 
     advance_scanner(s);
-    uint64_t reader_end_pos = s->reader.pos - scanner_buffer_size;
-    token.literal           = new_str_slice(s->reader.s, reader_start_pos, reader_end_pos);
-    token.type              = tt_Character;
-
+    token.type    = tt_Character;
+    token.literal = slice_from_str_byte_reader_mark(&s->reader);
     return token;
 }
 

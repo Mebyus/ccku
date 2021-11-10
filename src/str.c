@@ -37,6 +37,10 @@ bool is_null_str(str s) {
 }
 
 str new_str_from_buf(char *buf, uint64_t size) {
+    if (size == 0) {
+        return new_null_str();
+    }
+
     uint8_t *bytes = (uint8_t *)malloc(size);
     if (bytes == NULL) {
         fatal(1, "not enough memory for new string");
@@ -58,6 +62,10 @@ str new_str_from_cstr(char *cstr) {
 }
 
 str new_str_from_bytes(uint8_t *bytes, uint64_t size) {
+    if (size == 0) {
+        return new_null_str();
+    }
+
     uint8_t *b = (uint8_t *)malloc(size);
     if (b == NULL) {
         fatal(1, "not enough memory for new string");

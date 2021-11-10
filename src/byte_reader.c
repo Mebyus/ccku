@@ -8,10 +8,12 @@
 const int ReaderBOF = -1;
 const int ReaderEOF = -2;
 
-StrByteReader init_str_byte_reader(str s) {
+StrByteReader init_str_byte_reader(str s, uint64_t buffer_offset) {
     StrByteReader r = {
-        .pos = 0,
-        .s   = s,
+        .offset = buffer_offset,
+        .pos    = 0,
+        .mark   = 0,
+        .s      = s,
     };
     DEBUG(printf("source len: %ld\n", s.len);)
     return r;
@@ -19,6 +21,7 @@ StrByteReader init_str_byte_reader(str s) {
 
 int read_next_code(StrByteReader *r) {
     if (r->pos >= r->s.len) {
+        r->pos++;
         return ReaderEOF;
     }
 
@@ -26,6 +29,21 @@ int read_next_code(StrByteReader *r) {
     DEBUG(printf("reader pos: %ld, byte: %d\n", r->pos, b);)
     r->pos++;
     return (int)b;
+}
+
+void mark_str_byte_reader_position(StrByteReader *r) {
+    if (r->pos < r->offset) {
+        r->mark = 0;
+        return;
+    }
+    r->mark = r->pos - r->offset;
+}
+
+str slice_from_str_byte_reader_mark(const StrByteReader *r) {
+    if (r->pos > r->s.len + r->offset) {
+        return new_str_slice_to_end(r->s, r->mark);
+    }
+    return new_str_slice(r->s, r->mark, r->pos - r->offset);
 }
 
 void free_str_byte_reader(StrByteReader r) {
