@@ -14,3 +14,7 @@ if s > 20 {
 }
 
 s = i + 'A'
+
+loop 45 {
+    println("Hello, world!")
+}

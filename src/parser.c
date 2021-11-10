@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include "parser.h"
 
 #define ENABLE_DEBUG 1
@@ -45,16 +47,19 @@ Expression parse_expression(Parser *p) {
     if (p->token.type == tt_Identifier) {
         expr = init_identifier_expression(p->token);
         advance_parser(p);
+        DEBUG(printf("identifier expression\n");)
         return expr;
     }
     if (p->token.type == tt_Integer) {
         expr = init_integer_expression(p->token);
         advance_parser(p);
+        DEBUG(printf("integer expression\n");)
         return expr;
     }
     if (p->token.type == tt_String) {
         expr = init_string_expression(p->token);
         advance_parser(p);
+        DEBUG(printf("string expression\n");)
         return expr;
     }
     return parse_expression(p);
@@ -71,6 +76,7 @@ Statement parse_define_statement(Parser *p) {
 
     advance_parser(p); // consume ";" token
 
+    DEBUG(printf("define statement\n");)
     return init_define_statement(left, right);
 }
 
@@ -87,10 +93,15 @@ Statement parse_call_statement(Parser *p) {
     advance_parser(p); // consume ")" token
     advance_parser(p); // consume ";" token
 
+    DEBUG(printf("call statement\n");)
     return init_expression_statement(init_call_expression(name_token, args));
 }
 
 Statement parse_statement(Parser *p) {
+    if (p->token.type == tt_Comment) {
+        skip_comments(p);
+    }
+
     switch (p->token.type) {
     case tt_Identifier:
         if (p->next_token.type == tt_Define) {
@@ -100,12 +111,12 @@ Statement parse_statement(Parser *p) {
             return parse_call_statement(p);
         }
         break;
-    case tt_Comment:
-        skip_comments(p);
-        break;
     default:
         break;
     }
+    advance_parser(p);
+
+    DEBUG(printf("empty statement\n");)
     return init_empty_statement();
 }
 

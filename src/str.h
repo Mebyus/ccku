@@ -33,4 +33,4 @@ bool are_strs_equal(str s1, str s2);
 char *str_to_cstr(str s);
 void free_str(str s);
 
-#endif
+#endif // KU_STR_H
