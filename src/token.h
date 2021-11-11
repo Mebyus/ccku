@@ -137,6 +137,7 @@ struct KeywordLookupResult {
 Token create_token(TokenType type, Position pos);
 Token create_token_with_literal(TokenType type, Position pos, str literal);
 KeywordLookupResult lookup_keyword(str s);
+bool are_tokens_equal(Token t1, Token t2);
 void print_token(Token token);
 void free_token(Token token);
 

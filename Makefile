@@ -8,7 +8,9 @@ $(shell mkdir -p ${OBJDIR})
 $(shell mkdir -p ${DEPDIR})
 
 BINNAME = cckuc
+TESTNAME = test
 BINPATH = ${BINDIR}/${BINNAME}
+TESTPATH = ${BINDIR}/${TESTNAME}
 
 CC = cc
 CSTANDARD = 11
@@ -22,9 +24,22 @@ ${OBJDIR}/ast.o ${OBJDIR}/parser.o ${OBJDIR}/byte_reader.o ${OBJDIR}/position.o 
 ${OBJDIR}/charset.o
 	${CC} -o $@ $^
 
+.PHONY: test
+test: ${TESTPATH}
+	${TESTPATH} 
+
+${TESTPATH}: ${OBJDIR}/test.o ${OBJDIR}/source.o ${OBJDIR}/scanner.o \
+${OBJDIR}/token.o ${OBJDIR}/str.o ${OBJDIR}/slice.o ${OBJDIR}/byte_reader.o \
+${OBJDIR}/position.o ${OBJDIR}/charset.o ${OBJDIR}/fatal.o
+	${CC} -o $@ $^
+
 ${OBJDIR}/cmd.o: ${SRCDIR}/cmd.c
 	${CC} ${CPPFLAGS} ${DEPDIR}/cmd.d ${CFLAGS} -o $@ -c $<
 -include ${DEPDIR}/cmd.d
+
+${OBJDIR}/test.o: ${SRCDIR}/test.c
+	${CC} ${CPPFLAGS} ${DEPDIR}/test.d ${CFLAGS} -o $@ -c $<
+-include ${DEPDIR}/test.d
 
 ${OBJDIR}/source.o: ${SRCDIR}/source.c
 	${CC} ${CPPFLAGS} ${DEPDIR}/source.d ${CFLAGS} -o $@ -c $<

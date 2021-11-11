@@ -284,6 +284,10 @@ void println_str(str s) {
     fwrite("\n", 1, 1, stdout);
 }
 
+void println() {
+    fwrite("\n", 1, 1, stdout);
+};
+
 void free_str(str s) {
     if (s.is_owner) {
         free(s.bytes);

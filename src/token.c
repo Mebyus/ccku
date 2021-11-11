@@ -119,6 +119,18 @@ KeywordLookupResult lookup_keyword(str s) {
     return result;
 }
 
+bool are_tokens_equal(Token t1, Token t2) {
+    bool equal = (t1.type == t2.type) && are_positions_equal(t1.pos, t2.pos);
+    if (!equal) {
+        return false;
+    }
+    TokenType type = t1.type;
+    if (has_static_literal(type)) {
+        return true;
+    }
+    return are_strs_equal(t1.literal, t2.literal);
+}
+
 void print_token(Token token) {
     str literal    = get_token_literal(token);
     str type_str   = format_uint64_as_decimal(token.type);

@@ -12,8 +12,8 @@ uint32_t get_new_cap(uint32_t cap);
 
 #define SLICE(type, ...)                                                                                               \
     (slice_of_##type##s) {                                                                                             \
-        .is_owner = false, .elem = (type *)(type[])__VA_ARGS__, .len = sizeof((type[])__VA_ARGS__),                    \
-        .cap = sizeof((type[])__VA_ARGS__),                                                                            \
+        .is_owner = false, .elem = (type *)(type[])__VA_ARGS__, .len = sizeof((type[])__VA_ARGS__) / sizeof(type),     \
+        .cap = sizeof((type[])__VA_ARGS__) / sizeof(type),                                                             \
     }
 
 #define TYPEDEF_SLICE(type)                                                                                            \
