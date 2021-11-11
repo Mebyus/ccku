@@ -184,12 +184,20 @@ Token scan_binary_number(Scanner *s) {
     advance_scanner(s); // skip '0' byte
     advance_scanner(s); // skip 'b' byte
 
-    do {
+    bool scanned_at_least_one_digit = false;
+    while (s->code != ReaderEOF && is_binary_digit((uint8_t)s->code)) {
         advance_scanner(s);
-    } while (s->code != ReaderEOF && is_binary_digit((uint8_t)s->code));
+        scanned_at_least_one_digit = true;
+    }
 
     if (is_alphanum((uint8_t)s->code)) {
         consume_word(s);
+        token.type    = tt_Illegal;
+        token.literal = slice_from_str_byte_reader_mark(&s->reader);
+        return token;
+    }
+
+    if (!scanned_at_least_one_digit) {
         token.type    = tt_Illegal;
         token.literal = slice_from_str_byte_reader_mark(&s->reader);
         return token;
@@ -209,12 +217,20 @@ Token scan_octal_number(Scanner *s) {
     advance_scanner(s); // skip '0' byte
     advance_scanner(s); // skip 'o' byte
 
-    do {
+    bool scanned_at_least_one_digit = false;
+    while (s->code != ReaderEOF && is_octal_digit((uint8_t)s->code)) {
         advance_scanner(s);
-    } while (s->code != ReaderEOF && is_octal_digit((uint8_t)s->code));
+        scanned_at_least_one_digit = true;
+    }
 
     if (is_alphanum((uint8_t)s->code)) {
         consume_word(s);
+        token.type    = tt_Illegal;
+        token.literal = slice_from_str_byte_reader_mark(&s->reader);
+        return token;
+    }
+
+    if (!scanned_at_least_one_digit) {
         token.type    = tt_Illegal;
         token.literal = slice_from_str_byte_reader_mark(&s->reader);
         return token;
@@ -256,12 +272,20 @@ Token scan_hexadecimal_number(Scanner *s) {
     advance_scanner(s); // skip '0' byte
     advance_scanner(s); // skip 'x' byte
 
-    do {
+    bool scanned_at_least_one_digit = false;
+    while (s->code != ReaderEOF && is_hexadecimal_digit((uint8_t)s->code)) {
         advance_scanner(s);
-    } while (s->code != ReaderEOF && is_hexadecimal_digit((uint8_t)s->code));
+        scanned_at_least_one_digit = true;
+    }
 
     if (is_alphanum((uint8_t)s->code)) {
         consume_word(s);
+        token.type    = tt_Illegal;
+        token.literal = slice_from_str_byte_reader_mark(&s->reader);
+        return token;
+    }
+
+    if (!scanned_at_least_one_digit) {
         token.type    = tt_Illegal;
         token.literal = slice_from_str_byte_reader_mark(&s->reader);
         return token;

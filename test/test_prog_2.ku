@@ -13,7 +13,8 @@ if s > 20 {
     s = s + s2[3]
 }
 
-s = i + 'A' + 0x
+s = i + 'A' + 0b + 0 + 0o + 0x + 0b101 + 0123 + 0o6340 + 0xAFD1234ee +
+    0b0155 + 0xa34dqw + 0xff/2
 
 loop 45 {
     println("Hello, world!")
