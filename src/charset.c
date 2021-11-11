@@ -1,6 +1,6 @@
 #include "charset.h"
 
-const uint8_t charset_bytes[256] = {
+const byte charset_bytes[256] = {
     0x00,
     0x01,
     0x02,
