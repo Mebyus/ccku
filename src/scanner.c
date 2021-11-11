@@ -270,6 +270,12 @@ Token scan_decimal_number(Scanner *s) {
         return token;
     }
 
+    if (s->prev_code == '.') {
+        token.type    = tt_Illegal;
+        token.literal = slice_from_str_byte_reader_mark(&s->reader);
+        return token;
+    }
+
     if (scanned_one_period) {
         token.type = tt_DecimalFloat;
     } else {
