@@ -36,9 +36,20 @@ bool is_null_str(str s) {
     return s.bytes == NULL;
 }
 
+str borrow_str_from_bytes_no_check(const uint8_t *bytes, uint64_t size) {
+    str s = {
+        .is_owner = false,
+        .bytes    = (uint8_t *)(void *)bytes, // dirty trick to avoid compiler warning
+        .len      = size,
+    };
+    return s;
+}
+
 str new_str_from_buf(char *buf, uint64_t size) {
     if (size == 0) {
         return new_null_str();
+    } else if (size == 1) {
+        return new_str_from_byte((uint8_t)buf[0]);
     }
 
     uint8_t *bytes = (uint8_t *)malloc(size);
@@ -64,6 +75,8 @@ str new_str_from_cstr(char *cstr) {
 str new_str_from_bytes(uint8_t *bytes, uint64_t size) {
     if (size == 0) {
         return new_null_str();
+    } else if (size == 1) {
+        return new_str_from_byte(bytes[0]);
     }
 
     uint8_t *b = (uint8_t *)malloc(size);
@@ -82,7 +95,7 @@ str new_str_from_bytes(uint8_t *bytes, uint64_t size) {
 }
 
 str new_str_from_byte(uint8_t b) {
-    return borrow_str_from_bytes(charset_bytes + b, 1);
+    return borrow_str_from_bytes_no_check(charset_bytes + b, 1);
 }
 
 str new_str_slice(str s, uint64_t start, uint64_t end) {
@@ -125,14 +138,11 @@ str take_str_from_str(str *s) {
     return new_str;
 }
 
-
 str borrow_str_from_bytes(const uint8_t *bytes, uint64_t size) {
-    str s = {
-        .is_owner = false,
-        .bytes    = (uint8_t *)(void *)bytes, // dirty trick to avoid compiler warning
-        .len      = size,
-    };
-    return s;
+    if (size == 0) {
+        return new_null_str();
+    }
+    return borrow_str_from_bytes_no_check(bytes, size);
 }
 
 uint8_t decimal_digit_to_charcode(uint8_t digit) {
@@ -165,9 +175,9 @@ uint8_t format_uint64_decimal_to_buf(uint64_t n, uint8_t *buf) {
 
 str format_small_decimal(uint32_t n) {
     if (n < 10) {
-        return borrow_str_from_bytes(decimal_digits_string + n, 1);
+        return borrow_str_from_bytes_no_check(decimal_digits_string + n, 1);
     }
-    return borrow_str_from_bytes(small_decimals_string + n * 2, 2);
+    return borrow_str_from_bytes_no_check(small_decimals_string + n * 2, 2);
 }
 
 str format_uint32_decimal(uint32_t n) {
