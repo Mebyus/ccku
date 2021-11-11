@@ -114,6 +114,10 @@ bool is_decimal_digit(uint8_t b) {
     return '0' <= b && b <= '9';
 }
 
+bool is_decimal_digit_or_period(uint8_t b) {
+    return ('0' <= b && b <= '9') || b == '.';
+}
+
 bool is_hexadecimal_digit(uint8_t b) {
     return ('0' <= b && b <= '9') || ('a' <= b && b <= 'f') || ('A' <= b && b <= 'F');
 }
@@ -247,18 +251,30 @@ Token scan_decimal_number(Scanner *s) {
     };
     mark_str_byte_reader_position(&s->reader);
 
+    bool scanned_one_period = false;
     do {
         advance_scanner(s);
-    } while (s->code != ReaderEOF && is_decimal_digit((uint8_t)s->code));
+        if (s->code == '.') {
+            if (scanned_one_period) {
+                break;
+            } else {
+                scanned_one_period = true;
+            }
+        }
+    } while (s->code != ReaderEOF && is_decimal_digit_or_period((uint8_t)s->code));
 
-    if (is_alphanum((uint8_t)s->code)) {
+    if (is_alphanum((uint8_t)s->code) || s->code == '.') {
         consume_word(s);
         token.type    = tt_Illegal;
         token.literal = slice_from_str_byte_reader_mark(&s->reader);
         return token;
     }
 
-    token.type    = tt_DecimalInteger;
+    if (scanned_one_period) {
+        token.type = tt_DecimalFloat;
+    } else {
+        token.type = tt_DecimalInteger;
+    }
     token.literal = slice_from_str_byte_reader_mark(&s->reader);
     return token;
 }
@@ -321,6 +337,11 @@ Token scan_number(Scanner *s) {
 
     if (s->next_code == 'x') {
         token = scan_hexadecimal_number(s);
+        return token;
+    }
+
+    if (s->next_code == '.') {
+        token = scan_decimal_number(s);
         return token;
     }
 

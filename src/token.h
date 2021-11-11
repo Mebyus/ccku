@@ -22,7 +22,7 @@ enum TokenType {
     tt_OctalInteger,       // e.g: 0o43671
     tt_DecimalInteger,     // e.g: 5367, 43_432, 1_000_097
     tt_HexadecimalInteger, // e.g: 0x43da1
-    tt_Float,              // e.g: 123.45
+    tt_DecimalFloat,       // e.g: 123.45
     tt_Character,          // e.g: 'a', '\t', 'p'
     tt_String,             // e.g: "abc", "", "\t\n  42Hello\n"
 
