@@ -125,14 +125,13 @@ void print_token(Token token) {
     str line_str   = format_uint64_as_decimal(token.pos.line);
     str column_str = format_uint64_as_decimal(token.pos.column);
 
-    fwrite(line_str.bytes, 1, line_str.len, stdout);
+    print_str(line_str);
     fwrite(":", 1, 1, stdout);
-    fwrite(column_str.bytes, 1, column_str.len, stdout);
+    print_str(column_str);
     fwrite("  ", 1, 2, stdout);
-    fwrite(type_str.bytes, 1, type_str.len, stdout);
+    print_str(type_str);
     fwrite("  ", 1, 2, stdout);
-    fwrite(literal.bytes, 1, literal.len, stdout);
-    fwrite("\n", 1, 1, stdout);
+    println_str(literal);
 
     free_str(type_str);
     free_str(line_str);

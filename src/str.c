@@ -272,6 +272,18 @@ bool are_strs_equal(str s1, str s2) {
     return memcmp(s1.bytes, s2.bytes, len) == 0;
 }
 
+void print_str(str s) {
+    if (s.len == 0) {
+        return;
+    }
+    fwrite(s.bytes, 1, s.len, stdout);
+}
+
+void println_str(str s) {
+    print_str(s);
+    fwrite("\n", 1, 1, stdout);
+}
+
 void free_str(str s) {
     if (s.is_owner) {
         free(s.bytes);
