@@ -121,9 +121,9 @@ KeywordLookupResult lookup_keyword(str s) {
 
 void print_token(Token token) {
     str literal    = get_token_literal(token);
-    str type_str   = format_uint32_decimal(token.type);
-    str line_str   = format_uint32_decimal(token.pos.line);
-    str column_str = format_uint32_decimal(token.pos.column);
+    str type_str   = format_uint64_as_decimal(token.type);
+    str line_str   = format_uint64_as_decimal(token.pos.line);
+    str column_str = format_uint64_as_decimal(token.pos.column);
 
     fwrite(line_str.bytes, 1, line_str.len, stdout);
     fwrite(":", 1, 1, stdout);

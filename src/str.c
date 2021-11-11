@@ -7,7 +7,6 @@
 #include "str.h"
 
 const uint8_t max_uint32_decimal_length = 10;
-const uint8_t zero_charcode             = '0';
 const uint32_t max_small_decimal        = 99;
 
 const uint8_t decimal_digits_string[10] = "0123456789";
@@ -146,7 +145,7 @@ str borrow_str_from_bytes(const uint8_t *bytes, uint64_t size) {
 }
 
 uint8_t decimal_digit_to_charcode(uint8_t digit) {
-    return (uint8_t)(digit + zero_charcode);
+    return (uint8_t)(digit + '0');
 }
 
 void reverse_bytes(uint8_t *bytes, uint64_t len) {
@@ -180,7 +179,7 @@ str format_small_decimal(uint32_t n) {
     return borrow_str_from_bytes_no_check(small_decimals_string + n * 2, 2);
 }
 
-str format_uint32_decimal(uint32_t n) {
+str format_uint64_as_decimal(uint32_t n) {
     if (n <= max_small_decimal) {
         return format_small_decimal(n);
     }
@@ -199,7 +198,23 @@ str format_uint32_decimal(uint32_t n) {
     return s;
 }
 
+uint64_t parse_uint64_from_binary_no_checks(str s) {
+    uint64_t num = 0;
+    for (uint64_t i = 0; i < s.len; i++) {
+        uint8_t bit = (uint8_t)(s.bytes[i] - '0');
+        num <<= 1;
+        num |= bit;
+    }
+    return num;
+}
+
 str copy_str(str s) {
+    if (s.len == 0) {
+        return new_null_str();
+    } else if (s.len == 1) {
+        return new_str_from_byte(s.bytes[0]);
+    }
+
     uint8_t *bytes = (uint8_t *)malloc(s.len);
     if (bytes == NULL) {
         fatal(1, "not enough memory for new string");
