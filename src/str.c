@@ -148,6 +148,19 @@ uint8_t decimal_digit_to_charcode(uint8_t digit) {
     return (uint8_t)(digit + '0');
 }
 
+uint8_t charcode_to_hexadecimal_digit(uint8_t code) {
+    uint8_t d = (uint8_t)(code - '0');
+    if (d < 10) {
+        return d;
+    }
+    d = (uint8_t)(code - 'A' + 10);
+    if (d < 16) {
+        return d;
+    }
+    d = (uint8_t)(code - 'a' + 10);
+    return d;
+}
+
 void reverse_bytes(uint8_t *bytes, uint64_t len) {
     uint64_t i, j;
     uint8_t b;
@@ -204,6 +217,26 @@ uint64_t parse_uint64_from_binary_no_checks(str s) {
         uint8_t bit = (uint8_t)(s.bytes[i] - '0');
         num <<= 1;
         num |= bit;
+    }
+    return num;
+}
+
+uint64_t parse_uint64_from_octal_no_checks(str s) {
+    uint64_t num = 0;
+    for (uint64_t i = 0; i < s.len; i++) {
+        uint8_t bits = (uint8_t)(s.bytes[i] - '0');
+        num <<= 3;
+        num |= bits;
+    }
+    return num;
+}
+
+uint64_t parse_uint64_from_hexadecimal_no_checks(str s) {
+    uint64_t num = 0;
+    for (uint64_t i = 0; i < s.len; i++) {
+        uint8_t bits = charcode_to_hexadecimal_digit(s.bytes[i]);
+        num <<= 4;
+        num |= bits;
     }
     return num;
 }

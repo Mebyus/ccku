@@ -30,6 +30,8 @@ str borrow_str_from_bytes(const uint8_t *bytes, uint64_t size);
 str copy_str(str s);
 str format_uint64_as_decimal(uint32_t n);
 uint64_t parse_uint64_from_binary_no_checks(str s);
+uint64_t parse_uint64_from_octal_no_checks(str s);
+uint64_t parse_uint64_from_hexadecimal_no_checks(str s);
 bool is_null_str(str s);
 bool are_strs_equal(str s1, str s2);
 char *str_to_cstr(str s);
