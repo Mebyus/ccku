@@ -1,0 +1,47 @@
+## id: 1
+## label: define statement
+## program:
+x := 12
+## tokens:
+1:1     IDENT       x
+1:3     :=
+1:6     DECINT      12
+1:8     EOF
+## end
+
+## id: 2
+## label: assign statement
+## program:
+x = 0
+## tokens:
+1:1     IDENT       x
+1:3     =
+1:5     DECINT      0
+1:6     TERM
+1:6     EOF
+## end
+
+## id: 3
+## label: function call (no args)
+## program:
+print()
+## tokens:
+1:1     IDENT       print
+1:6     (
+1:7     )
+1:8     TERM
+1:8     EOF
+## end
+
+## id: 4
+## label: function call (string literal arg)
+## program:
+print("Hello, world!")
+## tokens:
+1:1     IDENT       print
+1:6     (
+1:7     STR         "Hello, world!"
+1:22    )
+1:23    TERM
+1:23    EOF
+## end
