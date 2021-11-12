@@ -1,90 +1,110 @@
-BINDIR = bin
-OBJDIR = obj
-SRCDIR = src
-DEPDIR = d
+-include .env
 
-$(shell mkdir -p ${BINDIR})
-$(shell mkdir -p ${OBJDIR})
-$(shell mkdir -p ${DEPDIR})
+BIN_DIR = bin
+OBJ_DIR = obj
+SRC_DIR = src
+DEP_DIR = d
 
-BINNAME = cckuc
-TESTNAME = test
-BINPATH = ${BINDIR}/${BINNAME}
-TESTPATH = ${BINDIR}/${TESTNAME}
+BIN_NAME = cckuc
+TEST_NAME = test
+
+RELEASE_DIR = release
+DEBUG_DIR = debug
 
 CC = cc
 CSTANDARD = 11
 OPTIMIZATION = 3
 CPPFLAGS = -MMD -MP -MF
-CFLAGS = -Wall -Wextra -Wconversion -Werror -std=c${CSTANDARD} -O${OPTIMIZATION}
 
-${BINPATH}: ${OBJDIR}/cmd.o ${OBJDIR}/source.o ${OBJDIR}/scanner.o \
-${OBJDIR}/token.o ${OBJDIR}/str.o ${OBJDIR}/fatal.o ${OBJDIR}/slice.o \
-${OBJDIR}/ast.o ${OBJDIR}/parser.o ${OBJDIR}/byte_reader.o ${OBJDIR}/position.o \
-${OBJDIR}/charset.o
+ifeq (${DEBUG}, true)
+	TARGET_BIN_DIR = ${BIN_DIR}/${DEBUG_DIR}
+	TARGET_OBJ_DIR = ${OBJ_DIR}/${DEBUG_DIR}
+	CFLAGS = -Wall -Wextra -Wconversion -Werror -std=c${CSTANDARD} -g
+else
+	TARGET_BIN_DIR = ${BIN_DIR}/${RELEASE_DIR}
+	TARGET_OBJ_DIR = ${OBJ_DIR}/${RELEASE_DIR}
+	CFLAGS = -Wall -Wextra -Wconversion -Werror -std=c${CSTANDARD} -O${OPTIMIZATION}
+endif
+
+$(shell mkdir -p ${TARGET_BIN_DIR})
+$(shell mkdir -p ${TARGET_OBJ_DIR})
+$(shell mkdir -p ${DEP_DIR})
+
+BIN_PATH = ${TARGET_BIN_DIR}/${BIN_NAME}
+TEST_PATH = ${TARGET_BIN_DIR}/${TEST_NAME}
+
+
+${BIN_PATH}: ${TARGET_OBJ_DIR}/cmd.o ${TARGET_OBJ_DIR}/source.o ${TARGET_OBJ_DIR}/scanner.o \
+${TARGET_OBJ_DIR}/token.o ${TARGET_OBJ_DIR}/str.o ${TARGET_OBJ_DIR}/fatal.o ${TARGET_OBJ_DIR}/slice.o \
+${TARGET_OBJ_DIR}/ast.o ${TARGET_OBJ_DIR}/parser.o ${TARGET_OBJ_DIR}/byte_reader.o ${TARGET_OBJ_DIR}/position.o \
+${TARGET_OBJ_DIR}/charset.o
 	${CC} -o $@ $^
 
 .PHONY: test
-test: ${TESTPATH}
-	${TESTPATH} 
+test: ${TEST_PATH}
+	${TEST_PATH} 
 
-${TESTPATH}: ${OBJDIR}/test.o ${OBJDIR}/source.o ${OBJDIR}/scanner.o \
-${OBJDIR}/token.o ${OBJDIR}/str.o ${OBJDIR}/slice.o ${OBJDIR}/byte_reader.o \
-${OBJDIR}/position.o ${OBJDIR}/charset.o ${OBJDIR}/fatal.o
+${TEST_PATH}: ${TARGET_OBJ_DIR}/test.o ${TARGET_OBJ_DIR}/source.o ${TARGET_OBJ_DIR}/scanner.o \
+${TARGET_OBJ_DIR}/token.o ${TARGET_OBJ_DIR}/str.o ${TARGET_OBJ_DIR}/slice.o ${TARGET_OBJ_DIR}/byte_reader.o \
+${TARGET_OBJ_DIR}/position.o ${TARGET_OBJ_DIR}/charset.o ${TARGET_OBJ_DIR}/fatal.o
 	${CC} -o $@ $^
 
-${OBJDIR}/cmd.o: ${SRCDIR}/cmd.c
-	${CC} ${CPPFLAGS} ${DEPDIR}/cmd.d ${CFLAGS} -o $@ -c $<
--include ${DEPDIR}/cmd.d
+${TARGET_OBJ_DIR}/cmd.o: ${SRC_DIR}/cmd.c
+	${CC} ${CPPFLAGS} ${DEP_DIR}/cmd.d ${CFLAGS} -o $@ -c $<
+-include ${DEP_DIR}/cmd.d
 
-${OBJDIR}/test.o: ${SRCDIR}/test.c
-	${CC} ${CPPFLAGS} ${DEPDIR}/test.d ${CFLAGS} -o $@ -c $<
--include ${DEPDIR}/test.d
+${TARGET_OBJ_DIR}/test.o: ${SRC_DIR}/test.c
+	${CC} ${CPPFLAGS} ${DEP_DIR}/test.d ${CFLAGS} -o $@ -c $<
+-include ${DEP_DIR}/test.d
 
-${OBJDIR}/source.o: ${SRCDIR}/source.c
-	${CC} ${CPPFLAGS} ${DEPDIR}/source.d ${CFLAGS} -o $@ -c $<
--include ${DEPDIR}/source.d
+${TARGET_OBJ_DIR}/source.o: ${SRC_DIR}/source.c
+	${CC} ${CPPFLAGS} ${DEP_DIR}/source.d ${CFLAGS} -o $@ -c $<
+-include ${DEP_DIR}/source.d
 
-${OBJDIR}/scanner.o: ${SRCDIR}/scanner.c
-	${CC} ${CPPFLAGS} ${DEPDIR}/scanner.d ${CFLAGS} -o $@ -c $<
--include ${DEPDIR}/scanner.d
+${TARGET_OBJ_DIR}/scanner.o: ${SRC_DIR}/scanner.c
+	${CC} ${CPPFLAGS} ${DEP_DIR}/scanner.d ${CFLAGS} -o $@ -c $<
+-include ${DEP_DIR}/scanner.d
 
-${OBJDIR}/token.o: ${SRCDIR}/token.c
-	${CC} ${CPPFLAGS} ${DEPDIR}/token.d ${CFLAGS} -o $@ -c $<
--include ${DEPDIR}/token.d
+${TARGET_OBJ_DIR}/token.o: ${SRC_DIR}/token.c
+	${CC} ${CPPFLAGS} ${DEP_DIR}/token.d ${CFLAGS} -o $@ -c $<
+-include ${DEP_DIR}/token.d
 
-${OBJDIR}/str.o: ${SRCDIR}/str.c
-	${CC} ${CPPFLAGS} ${DEPDIR}/str.d ${CFLAGS} -o $@ -c $<
--include ${DEPDIR}/str.d
+${TARGET_OBJ_DIR}/str.o: ${SRC_DIR}/str.c
+	${CC} ${CPPFLAGS} ${DEP_DIR}/str.d ${CFLAGS} -o $@ -c $<
+-include ${DEP_DIR}/str.d
 
-${OBJDIR}/byte_reader.o: ${SRCDIR}/byte_reader.c
-	${CC} ${CPPFLAGS} ${DEPDIR}/byte_reader.d ${CFLAGS} -o $@ -c $<
--include ${DEPDIR}/byte_reader.d
+${TARGET_OBJ_DIR}/byte_reader.o: ${SRC_DIR}/byte_reader.c
+	${CC} ${CPPFLAGS} ${DEP_DIR}/byte_reader.d ${CFLAGS} -o $@ -c $<
+-include ${DEP_DIR}/byte_reader.d
 
-${OBJDIR}/position.o: ${SRCDIR}/position.c
-	${CC} ${CPPFLAGS} ${DEPDIR}/position.d ${CFLAGS} -o $@ -c $<
--include ${DEPDIR}/position.d
+${TARGET_OBJ_DIR}/position.o: ${SRC_DIR}/position.c
+	${CC} ${CPPFLAGS} ${DEP_DIR}/position.d ${CFLAGS} -o $@ -c $<
+-include ${DEP_DIR}/position.d
 
-${OBJDIR}/slice.o: ${SRCDIR}/slice.c
-	${CC} ${CPPFLAGS} ${DEPDIR}/slice.d ${CFLAGS} -o $@ -c $<
--include ${DEPDIR}/slice.d
+${TARGET_OBJ_DIR}/slice.o: ${SRC_DIR}/slice.c
+	${CC} ${CPPFLAGS} ${DEP_DIR}/slice.d ${CFLAGS} -o $@ -c $<
+-include ${DEP_DIR}/slice.d
 
-${OBJDIR}/ast.o: ${SRCDIR}/ast.c
-	${CC} ${CPPFLAGS} ${DEPDIR}/ast.d ${CFLAGS} -o $@ -c $<
--include ${DEPDIR}/ast.d
+${TARGET_OBJ_DIR}/ast.o: ${SRC_DIR}/ast.c
+	${CC} ${CPPFLAGS} ${DEP_DIR}/ast.d ${CFLAGS} -o $@ -c $<
+-include ${DEP_DIR}/ast.d
 
-${OBJDIR}/parser.o: ${SRCDIR}/parser.c
-	${CC} ${CPPFLAGS} ${DEPDIR}/parser.d ${CFLAGS} -o $@ -c $<
--include ${DEPDIR}/parser.d
+${TARGET_OBJ_DIR}/parser.o: ${SRC_DIR}/parser.c
+	${CC} ${CPPFLAGS} ${DEP_DIR}/parser.d ${CFLAGS} -o $@ -c $<
+-include ${DEP_DIR}/parser.d
 
-${OBJDIR}/fatal.o: ${SRCDIR}/fatal.c
-	${CC} ${CPPFLAGS} ${DEPDIR}/fatal.d ${CFLAGS} -o $@ -c $<
--include ${DEPDIR}/fatal.d
+${TARGET_OBJ_DIR}/fatal.o: ${SRC_DIR}/fatal.c
+	${CC} ${CPPFLAGS} ${DEP_DIR}/fatal.d ${CFLAGS} -o $@ -c $<
+-include ${DEP_DIR}/fatal.d
 
-${OBJDIR}/charset.o: ${SRCDIR}/charset.c
-	${CC} ${CPPFLAGS} ${DEPDIR}/charset.d ${CFLAGS} -o $@ -c $<
--include ${DEPDIR}/charset.d
+${TARGET_OBJ_DIR}/charset.o: ${SRC_DIR}/charset.c
+	${CC} ${CPPFLAGS} ${DEP_DIR}/charset.d ${CFLAGS} -o $@ -c $<
+-include ${DEP_DIR}/charset.d
+
+${TARGET_OBJ_DIR}/timer.o: ${SRC_DIR}/timer.c
+	${CC} ${CPPFLAGS} ${DEP_DIR}/timer.d ${CFLAGS} -o $@ -c $<
+-include ${DEP_DIR}/timer.d
 
 .PHONY: clean
 clean:
-	rm -rf ${BINDIR} ${OBJDIR} ${DEPDIR}
+	rm -rf ${BIN_DIR} ${OBJ_DIR} ${DEP_DIR}
