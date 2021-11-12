@@ -11,6 +11,8 @@ typedef struct Scanner Scanner;
 
 struct Scanner {
     bool prefetched;
+    bool insert_terminator;
+    bool insert_blocked;
 
     int backup_code;
     int prev_code;

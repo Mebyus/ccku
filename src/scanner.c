@@ -56,12 +56,14 @@ Scanner *new_scanner_from_source(SourceText source) {
         fatal(1, "not enough memory for new scanner");
     }
 
-    s->prefetched = false;
-    s->pos        = init_null_position();
-    s->prev_code  = ReaderBOF;
-    s->code       = ReaderBOF;
-    s->next_code  = ReaderBOF;
-    s->reader     = init_str_byte_reader(source.text, scanner_buffer_size);
+    s->prefetched        = false;
+    s->insert_terminator = false;
+    s->insert_blocked    = false;
+    s->pos               = init_null_position();
+    s->prev_code         = ReaderBOF;
+    s->code              = ReaderBOF;
+    s->next_code         = ReaderBOF;
+    s->reader            = init_str_byte_reader(source.text, scanner_buffer_size);
     init_scanner_buffer(s);
     return s;
 }
@@ -72,12 +74,14 @@ Scanner *new_scanner_from_str(str s) {
 
 Scanner init_scanner_from_source(SourceText source) {
     Scanner s = {
-        .prefetched = false,
-        .pos        = init_null_position(),
-        .prev_code  = ReaderBOF,
-        .code       = ReaderBOF,
-        .next_code  = ReaderBOF,
-        .reader     = init_str_byte_reader(source.text, scanner_buffer_size),
+        .prefetched        = false,
+        .insert_terminator = false,
+        .insert_blocked    = false,
+        .pos               = init_null_position(),
+        .prev_code         = ReaderBOF,
+        .code              = ReaderBOF,
+        .next_code         = ReaderBOF,
+        .reader            = init_str_byte_reader(source.text, scanner_buffer_size),
     };
     init_scanner_buffer(&s);
     return s;
@@ -85,12 +89,14 @@ Scanner init_scanner_from_source(SourceText source) {
 
 Scanner init_scanner_from_str(str string) {
     Scanner s = {
-        .prefetched = false,
-        .pos        = init_null_position(),
-        .prev_code  = ReaderBOF,
-        .code       = ReaderBOF,
-        .next_code  = ReaderBOF,
-        .reader     = init_str_byte_reader(string, scanner_buffer_size),
+        .prefetched        = false,
+        .insert_terminator = false,
+        .insert_blocked    = false,
+        .pos               = init_null_position(),
+        .prev_code         = ReaderBOF,
+        .code              = ReaderBOF,
+        .next_code         = ReaderBOF,
+        .reader            = init_str_byte_reader(string, scanner_buffer_size),
     };
     init_scanner_buffer(&s);
     return s;
@@ -130,11 +136,26 @@ bool is_binary_digit(byte b) {
 }
 
 bool is_whitespace(byte b) {
-    return b == ' ' || b == '\n' || b == '\t' || b == '\r';
+    return b == ' ' || b == '\n';
+}
+
+bool is_terminator_token(TokenType type) {
+    return type == tt_Identifier || type == tt_Return || type == tt_Break || type == tt_Continue;
+}
+
+bool does_token_block_terminator(TokenType type) {
+    return type == tt_Function || type == tt_If || type == tt_Else || type == tt_ElseIf || type == tt_Loop ||
+           type == tt_For || type == tt_While || type == tt_Switch;
 }
 
 void skip_whitespace(Scanner *s) {
     while (s->code >= 0 && is_whitespace((byte)s->code)) {
+        advance_scanner(s);
+    }
+}
+
+void skip_space(Scanner *s) {
+    while (s->code >= 0 && s->code == ' ') {
         advance_scanner(s);
     }
 }
@@ -175,6 +196,13 @@ Token scan_name(Scanner *s) {
         token.type = tt_Identifier;
     }
 
+    if (!s->insert_blocked && is_terminator_token(token.type)) {
+        s->insert_terminator = true;
+    }
+    if (does_token_block_terminator(token.type)) {
+        s->insert_terminator = false;
+        s->insert_blocked    = true;
+    }
     return token;
 }
 
@@ -529,6 +557,16 @@ Token scan_pipe_start(Scanner *s) {
     return token;
 }
 
+Token scan_left_curly_bracket(Scanner *s) {
+    Token token;
+
+    s->insert_blocked = false;
+    token             = create_token_at_scanner_position(s, tt_LeftCurlyBracket);
+    advance_scanner(s);
+
+    return token;
+}
+
 Token scan_plus_start(Scanner *s) {
     Token token;
 
@@ -587,7 +625,7 @@ Token scan_other(Scanner *s) {
     case ')':
         return scan_single_byte_token(s, tt_RightRoundBracket);
     case '{':
-        return scan_single_byte_token(s, tt_LeftCurlyBracket);
+        return scan_left_curly_bracket(s);
     case '}':
         return scan_single_byte_token(s, tt_RightCurlyBracket);
     case '[':
@@ -633,14 +671,34 @@ Token scan_other(Scanner *s) {
 Token scan_token(Scanner *s) {
     Token token;
     if (s->code == ReaderEOF) {
-        token = create_token_at_scanner_position(s, tt_EOF);
+        if (s->insert_terminator) {
+            s->insert_terminator = false;
+            token                = create_token_at_scanner_position(s, tt_Terminator);
+        } else {
+            token = create_token_at_scanner_position(s, tt_EOF);
+        }
         return token;
     }
 
-    skip_whitespace(s);
-    if (s->code == ReaderEOF) {
-        token = create_token_at_scanner_position(s, tt_EOF);
-        return token;
+    if (s->insert_terminator) {
+        skip_space(s);
+        if (s->code == ReaderEOF || s->code == '}') {
+            s->insert_terminator = false;
+            token                = create_token_at_scanner_position(s, tt_Terminator);
+            return token;
+        }
+        if (s->code == '\n') {
+            s->insert_terminator = false;
+            token                = create_token_at_scanner_position(s, tt_Terminator);
+            advance_scanner(s);
+            return token;
+        }
+    } else {
+        skip_whitespace(s);
+        if (s->code == ReaderEOF) {
+            token = create_token_at_scanner_position(s, tt_EOF);
+            return token;
+        }
     }
 
     if (is_letter_or_underscore((byte)s->code)) {
