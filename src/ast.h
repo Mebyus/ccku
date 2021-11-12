@@ -1,48 +1,6 @@
 #ifndef KU_STATEMENT_H
 #define KU_STATEMENT_H
 
-// Language syntax in Backus-Naur form
-//
-// <SourceText> => <ModuleClause>, [<ImportClause>], { <TopLevelDeclaration> }, <EOF>;
-//
-// <ModuleClause> => "module", <Identifier>, ";";
-//
-// <TopLevelDeclaration> => <ConstDeclaration> | <TypeDeclaration> | <VarDeclaration> | <FunctionDeclaration>
-//
-// <BlockStatement> => "{", <StatementList>, "}";
-//
-// <StatementList> => { <Statement> };
-//
-// <Statement> => <BlockStatement> | <AssignStatement> | <DefineStatement> | <IfStatement>
-//                <DeferStatement> | <ExpressionStatement> | <ReturnStatement> | <MatchStatement>;
-//
-// <DeferStatement> => "defer", <DeferClause>;
-//
-// <IfStatement> => <IfClause>, { <ElifClause> }, [ <ElseClause> ];
-//
-// <IfClause> => "if", <Expression>, <BlockStatement>;
-//
-// <ElifClause> => "elif", <Expression>, <BlockStatement>;
-//
-// <ElseClause> => "else", <BlockStatement>;
-//
-// <ExpressionStatement> => <Expression>, ";";
-//
-// <DeferClause> => <CallExpression>, ";" | <BlockStatement>;
-//
-// <DefineStatement> => [ "imt" ], <Identifier>, { ",", <Identifier> }, ":=", <Expression>, { ",", <Expression> }, ";";
-//
-// <SelectorExpression> => <Expression>, ".", <Identifier>
-//
-// <CallExpression> => <Expression>, "(", { <Expression>, "," }, ")";
-//
-// <DestinationExpression> => <IndexExpression> | <Identifier>
-//
-// <AssignStatement> => <DestinationExpression>, { ",", <DestinationExpression> }, "=", <Expression>, { ",",
-//                      <Expression> }, ";";
-//
-// <ReturnStatement> => "return", [ <Expression> ], ";";
-
 #include "slice.h"
 #include "str.h"
 #include "token.h"
