@@ -1,14 +1,13 @@
 #ifndef KU_SLICE_H
 #define KU_SLICE_H
 
-#include <stdbool.h>
-#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "fatal.h"
+#include "types.h"
 
-uint32_t get_new_cap(uint32_t cap);
+u32 get_new_cap(u32 cap);
 
 #define SLICE(type, ...)                                                                                               \
     (slice_of_##type##s) {                                                                                             \
@@ -21,8 +20,8 @@ uint32_t get_new_cap(uint32_t cap);
     struct slice_of_##type##s {                                                                                        \
         bool is_owner;                                                                                                 \
         type *elem;                                                                                                    \
-        uint32_t len;                                                                                                  \
-        uint32_t cap;                                                                                                  \
+        u32 len;                                                                                                       \
+        u32 cap;                                                                                                       \
     };                                                                                                                 \
     slice_of_##type##s new_null_slice_of_##type##s();                                                                  \
     void append_##type##_to_slice(slice_of_##type##s *s, type x);                                                      \
@@ -32,7 +31,7 @@ uint32_t get_new_cap(uint32_t cap);
     slice_of_##type##s new_null_slice_of_##type##s() {                                                                 \
         slice_of_##type##s s = {                                                                                       \
             .is_owner = false,                                                                                         \
-            .elem     = NULL,                                                                                          \
+            .elem     = nil,                                                                                           \
             .len      = 0,                                                                                             \
             .cap      = 0,                                                                                             \
         };                                                                                                             \
@@ -40,16 +39,16 @@ uint32_t get_new_cap(uint32_t cap);
     }                                                                                                                  \
                                                                                                                        \
     bool is_null_slice_of_##type##s(slice_of_##type##s s) {                                                            \
-        return s.elem == NULL;                                                                                         \
+        return s.elem == nil;                                                                                          \
     }                                                                                                                  \
                                                                                                                        \
-    void recap_slice_of_##type##s(slice_of_##type##s *s, uint32_t cap) {                                               \
-        uint64_t new_size = ((uint64_t)cap) * ((uint64_t)sizeof(type));                                                \
-        s->cap            = cap;                                                                                       \
+    void recap_slice_of_##type##s(slice_of_##type##s *s, u32 cap) {                                                    \
+        u64 new_size = ((u64)cap) * ((u64)sizeof(type));                                                               \
+        s->cap       = cap;                                                                                            \
                                                                                                                        \
-        if (s->elem == NULL) {                                                                                         \
+        if (s->elem == nil) {                                                                                          \
             type *new_ptr = (type *)malloc(new_size);                                                                  \
-            if (new_ptr == NULL) {                                                                                     \
+            if (new_ptr == nil) {                                                                                      \
                 fatal(1, "not enough memory to resize a slice");                                                       \
             }                                                                                                          \
             s->is_owner = true;                                                                                        \
@@ -59,7 +58,7 @@ uint32_t get_new_cap(uint32_t cap);
                                                                                                                        \
         if (s->is_owner) {                                                                                             \
             type *new_ptr = (type *)realloc(s->elem, new_size);                                                        \
-            if (new_ptr == NULL) {                                                                                     \
+            if (new_ptr == nil) {                                                                                      \
                 fatal(1, "not enough memory to resize a slice");                                                       \
             }                                                                                                          \
             s->elem = new_ptr;                                                                                         \
@@ -67,12 +66,12 @@ uint32_t get_new_cap(uint32_t cap);
         }                                                                                                              \
                                                                                                                        \
         type *new_ptr = (type *)malloc(new_size);                                                                      \
-        if (new_ptr == NULL) {                                                                                         \
+        if (new_ptr == nil) {                                                                                          \
             fatal(1, "not enough memory to resize a slice");                                                           \
         }                                                                                                              \
                                                                                                                        \
         s->is_owner = true;                                                                                            \
-        memcpy(new_ptr, s->elem, ((uint64_t)s->len) * ((uint64_t)sizeof(type)));                                       \
+        memcpy(new_ptr, s->elem, ((u64)s->len) * ((u64)sizeof(type)));                                                 \
         s->elem = new_ptr;                                                                                             \
     }                                                                                                                  \
                                                                                                                        \

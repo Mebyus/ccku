@@ -1,10 +1,9 @@
-#include <stdbool.h>
 #include <stdlib.h>
 
 #include "fatal.h"
 #include "scanner.h"
 
-const uint64_t scanner_buffer_size = 2;
+const u8 scanner_buffer_size = 2;
 
 int get_next_code(Scanner *s) {
     int code;
@@ -46,14 +45,14 @@ void step_back_scanner(Scanner *s) {
 }
 
 void init_scanner_buffer(Scanner *s) {
-    for (uint64_t i = 0; i < scanner_buffer_size; i++) {
+    for (u8 i = 0; i < scanner_buffer_size; i++) {
         advance_scanner(s);
     }
 }
 
 Scanner *new_scanner_from_source(SourceText source) {
     Scanner *s = (Scanner *)malloc(sizeof(Scanner));
-    if (s == NULL) {
+    if (s == nil) {
         fatal(1, "not enough memory for new scanner");
     }
 
@@ -98,44 +97,44 @@ Scanner init_scanner_from_str(str string) {
 }
 
 
-bool is_letter_or_underscore(uint8_t b) {
+bool is_letter_or_underscore(byte b) {
     return ('a' <= b && b <= 'z') || b == '_' || ('A' <= b && b <= 'Z');
 }
 
-bool is_alphanum(uint8_t b) {
+bool is_alphanum(byte b) {
     return ('a' <= b && b <= 'z') || b == '_' || ('A' <= b && b <= 'Z') || ('0' <= b && b <= '9');
 }
 
-bool is_letter(uint8_t b) {
+bool is_letter(byte b) {
     return ('a' <= b && b <= 'z') || ('A' <= b && b <= 'Z');
 }
 
-bool is_decimal_digit(uint8_t b) {
+bool is_decimal_digit(byte b) {
     return '0' <= b && b <= '9';
 }
 
-bool is_decimal_digit_or_period(uint8_t b) {
+bool is_decimal_digit_or_period(byte b) {
     return ('0' <= b && b <= '9') || b == '.';
 }
 
-bool is_hexadecimal_digit(uint8_t b) {
+bool is_hexadecimal_digit(byte b) {
     return ('0' <= b && b <= '9') || ('a' <= b && b <= 'f') || ('A' <= b && b <= 'F');
 }
 
-bool is_octal_digit(uint8_t b) {
+bool is_octal_digit(byte b) {
     return '0' <= b && b <= '7';
 }
 
-bool is_binary_digit(uint8_t b) {
+bool is_binary_digit(byte b) {
     return b == '0' || b == '1';
 }
 
-bool is_whitespace(uint8_t b) {
+bool is_whitespace(byte b) {
     return b == ' ' || b == '\n' || b == '\t' || b == '\r';
 }
 
 void skip_whitespace(Scanner *s) {
-    while (s->code >= 0 && is_whitespace((uint8_t)s->code)) {
+    while (s->code >= 0 && is_whitespace((byte)s->code)) {
         advance_scanner(s);
     }
 }
@@ -147,7 +146,7 @@ Token create_token_at_scanner_position(Scanner *s, TokenType type) {
 void consume_word(Scanner *s) {
     do {
         advance_scanner(s);
-    } while (s->code != ReaderEOF && is_alphanum((uint8_t)s->code));
+    } while (s->code != ReaderEOF && is_alphanum((byte)s->code));
 }
 
 Token scan_illegal_word(Scanner *s) {
@@ -189,12 +188,12 @@ Token scan_binary_number(Scanner *s) {
     advance_scanner(s); // skip 'b' byte
 
     bool scanned_at_least_one_digit = false;
-    while (s->code != ReaderEOF && is_binary_digit((uint8_t)s->code)) {
+    while (s->code != ReaderEOF && is_binary_digit((byte)s->code)) {
         advance_scanner(s);
         scanned_at_least_one_digit = true;
     }
 
-    if (is_alphanum((uint8_t)s->code)) {
+    if (is_alphanum((byte)s->code)) {
         consume_word(s);
         token.type    = tt_Illegal;
         token.literal = slice_from_str_byte_reader_mark(&s->reader);
@@ -222,12 +221,12 @@ Token scan_octal_number(Scanner *s) {
     advance_scanner(s); // skip 'o' byte
 
     bool scanned_at_least_one_digit = false;
-    while (s->code != ReaderEOF && is_octal_digit((uint8_t)s->code)) {
+    while (s->code != ReaderEOF && is_octal_digit((byte)s->code)) {
         advance_scanner(s);
         scanned_at_least_one_digit = true;
     }
 
-    if (is_alphanum((uint8_t)s->code)) {
+    if (is_alphanum((byte)s->code)) {
         consume_word(s);
         token.type    = tt_Illegal;
         token.literal = slice_from_str_byte_reader_mark(&s->reader);
@@ -261,9 +260,9 @@ Token scan_decimal_number(Scanner *s) {
                 scanned_one_period = true;
             }
         }
-    } while (s->code != ReaderEOF && is_decimal_digit_or_period((uint8_t)s->code));
+    } while (s->code != ReaderEOF && is_decimal_digit_or_period((byte)s->code));
 
-    if (is_alphanum((uint8_t)s->code) || s->code == '.') {
+    if (is_alphanum((byte)s->code) || s->code == '.') {
         consume_word(s);
         token.type    = tt_Illegal;
         token.literal = slice_from_str_byte_reader_mark(&s->reader);
@@ -295,12 +294,12 @@ Token scan_hexadecimal_number(Scanner *s) {
     advance_scanner(s); // skip 'x' byte
 
     bool scanned_at_least_one_digit = false;
-    while (s->code != ReaderEOF && is_hexadecimal_digit((uint8_t)s->code)) {
+    while (s->code != ReaderEOF && is_hexadecimal_digit((byte)s->code)) {
         advance_scanner(s);
         scanned_at_least_one_digit = true;
     }
 
-    if (is_alphanum((uint8_t)s->code)) {
+    if (is_alphanum((byte)s->code)) {
         consume_word(s);
         token.type    = tt_Illegal;
         token.literal = slice_from_str_byte_reader_mark(&s->reader);
@@ -351,7 +350,7 @@ Token scan_number(Scanner *s) {
         return token;
     }
 
-    if (is_alphanum((uint8_t)s->next_code)) {
+    if (is_alphanum((byte)s->next_code)) {
         token = scan_illegal_word(s);
         return token;
     }
@@ -466,7 +465,7 @@ Token scan_single_byte_token(Scanner *s, TokenType type) {
 }
 
 Token scan_illegal_byte_token(Scanner *s) {
-    Token token = create_token_with_literal(tt_Illegal, s->pos, new_str_from_byte((uint8_t)s->code));
+    Token token = create_token_with_literal(tt_Illegal, s->pos, new_str_from_byte((byte)s->code));
     advance_scanner(s);
     return token;
 }
@@ -531,12 +530,12 @@ Token scan_token(Scanner *s) {
         return token;
     }
 
-    if (is_letter_or_underscore((uint8_t)s->code)) {
+    if (is_letter_or_underscore((byte)s->code)) {
         token = scan_name(s);
         return token;
     }
 
-    if (is_decimal_digit((uint8_t)s->code)) {
+    if (is_decimal_digit((byte)s->code)) {
         token = scan_number(s);
         return token;
     }

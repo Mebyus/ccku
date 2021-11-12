@@ -2,8 +2,8 @@
 
 #include "token.h"
 
-const uint64_t min_keyword_length = 2;
-const uint64_t max_keyword_length = 9;
+const u8 min_keyword_length = 2;
+const u8 max_keyword_length = 9;
 
 str token_type_str[] = {
     [tt_Illegal]            = STR("ILLEGAL"),
@@ -133,9 +133,9 @@ bool are_tokens_equal(Token t1, Token t2) {
 
 void print_token(Token token) {
     str literal    = get_token_literal(token);
-    str type_str   = format_uint64_as_decimal(token.type);
-    str line_str   = format_uint64_as_decimal(token.pos.line);
-    str column_str = format_uint64_as_decimal(token.pos.column);
+    str type_str   = format_u64_as_decimal(token.type);
+    str line_str   = format_u64_as_decimal(token.pos.line);
+    str column_str = format_u64_as_decimal(token.pos.column);
 
     print_str(line_str);
     fwrite(":", 1, 1, stdout);

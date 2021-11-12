@@ -3,14 +3,14 @@
 Statement init_empty_statement() {
     Statement stmt = {
         .type = st_Empty,
-        .ptr  = NULL,
+        .ptr  = nil,
     };
     return stmt;
 }
 
 Statement init_define_statement(slice_of_Expressions left, slice_of_Expressions right) {
     DefineStatement *dstmt = (DefineStatement *)malloc(sizeof(DefineStatement));
-    if (dstmt == NULL) {
+    if (dstmt == nil) {
         fatal(1, "not enough memory for new define statement");
     }
     dstmt->left  = left;
@@ -25,7 +25,7 @@ Statement init_define_statement(slice_of_Expressions left, slice_of_Expressions 
 
 Statement init_expression_statement(Expression expr) {
     Expression *new_expr = (Expression *)malloc(sizeof(Expression));
-    if (new_expr == NULL) {
+    if (new_expr == nil) {
         fatal(1, "not enough memory for new define statement");
     }
     *new_expr = expr;
@@ -39,7 +39,7 @@ Statement init_expression_statement(Expression expr) {
 
 Expression init_identifier_expression(Token token) {
     Identifier *ident = (Identifier *)malloc(sizeof(Identifier));
-    if (ident == NULL) {
+    if (ident == nil) {
         fatal(1, "not enough memory for new identifier expression");
     }
     ident->name = take_str_from_str(&token.literal);
@@ -53,7 +53,7 @@ Expression init_identifier_expression(Token token) {
 
 Expression init_integer_expression(Token token) {
     Integer *literal = (Integer *)malloc(sizeof(Integer));
-    if (literal == NULL) {
+    if (literal == nil) {
         fatal(1, "not enough memory for new integer literal expression");
     }
     literal->token = token;
@@ -67,7 +67,7 @@ Expression init_integer_expression(Token token) {
 
 Expression init_string_expression(Token token) {
     String *literal = (String *)malloc(sizeof(String));
-    if (literal == NULL) {
+    if (literal == nil) {
         fatal(1, "not enough memory for new string literal expression");
     }
     literal->token = token;
@@ -81,7 +81,7 @@ Expression init_string_expression(Token token) {
 
 Expression init_call_expression(Token name_token, slice_of_Expressions args) {
     CallExpression *cexpr = (CallExpression *)malloc(sizeof(CallExpression));
-    if (cexpr == NULL) {
+    if (cexpr == nil) {
         fatal(1, "not enough memory for new call expression");
     }
     cexpr->function_name = take_str_from_str(&name_token.literal);

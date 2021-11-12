@@ -1,7 +1,10 @@
 #ifndef KU_BYTE_H
 #define KU_BYTE_H
 
+#include <stdbool.h>
 #include <stdint.h>
+
+#define nil NULL
 
 typedef uint8_t u8;
 typedef uint16_t u16;

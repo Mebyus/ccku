@@ -8,7 +8,7 @@
 const int ReaderBOF = -1;
 const int ReaderEOF = -2;
 
-StrByteReader init_str_byte_reader(str s, uint64_t buffer_offset) {
+StrByteReader init_str_byte_reader(str s, u64 buffer_offset) {
     StrByteReader r = {
         .offset = buffer_offset,
         .pos    = 0,
@@ -25,7 +25,7 @@ int read_next_code(StrByteReader *r) {
         return ReaderEOF;
     }
 
-    uint8_t b = r->s.bytes[r->pos];
+    byte b = r->s.bytes[r->pos];
     DEBUG(printf("reader pos: %ld, byte: %d\n", r->pos, b);)
     r->pos++;
     return (int)b;

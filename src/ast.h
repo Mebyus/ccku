@@ -1,10 +1,6 @@
 #ifndef KU_STATEMENT_H
 #define KU_STATEMENT_H
 
-#include "slice.h"
-#include "str.h"
-#include "token.h"
-
 // Language syntax in Backus-Naur form
 //
 // <SourceText> => <ModuleClause>, [<ImportClause>], { <TopLevelDeclaration> }, <EOF>;
@@ -46,6 +42,11 @@
 //                      <Expression> }, ";";
 //
 // <ReturnStatement> => "return", [ <Expression> ], ";";
+
+#include "slice.h"
+#include "str.h"
+#include "token.h"
+#include "types.h"
 
 typedef enum StatementType StatementType;
 typedef enum ExpressionType ExpressionType;

@@ -1,6 +1,6 @@
 #include "position.h"
 
-Position init_position(uint32_t line, uint32_t column) {
+Position init_position(u32 line, u32 column) {
     Position pos = {
         .line   = line,
         .column = column,

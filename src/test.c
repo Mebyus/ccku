@@ -1,5 +1,6 @@
 #include "scanner.h"
 #include "slice.h"
+#include "types.h"
 
 TYPEDEF_SLICE(Token);
 IMPLEMENT_SLICE(Token);
@@ -22,7 +23,7 @@ const str got_str  = STR("Got:  ");
 int main() {
     ScannerTestCase test_case1 = {
         .label       = STR("empty source"),
-        .source_str  = new_null_str(),
+        .source_str  = new_empty_str(),
         .want_tokens = SLICE(Token, {{.type = tt_EOF, .pos = {.line = 1, .column = 1}}}),
     };
     ScannerTestCase test_case2 = {
@@ -45,11 +46,11 @@ int main() {
     };
     slice_of_ScannerTestCases test_cases = SLICE(ScannerTestCase, {test_case1, test_case2, test_case3});
     println();
-    for (uint32_t i = 0; i < test_cases.len; i++) {
+    for (u32 i = 0; i < test_cases.len; i++) {
         ScannerTestCase test_case = test_cases.elem[i];
         Scanner scanner           = init_scanner_from_str(test_case.source_str);
         Scanner *s                = &scanner;
-        for (uint32_t j = 0; j < test_case.want_tokens.len; j++) {
+        for (u32 j = 0; j < test_case.want_tokens.len; j++) {
             Token want_token = test_case.want_tokens.elem[j];
             Token got_token  = scan_token(s);
             if (!are_tokens_equal(want_token, got_token)) {

@@ -6,16 +6,16 @@
 #include "fatal.h"
 #include "source.h"
 
-const uint64_t max_source_size = 1 << 26;
+const u64 max_source_size = 1 << 26;
 
-SourceReadErrCode read_all(int fd, uint8_t *buf, uint64_t buf_size) {
-    uint64_t bytes_left = buf_size;
-    uint64_t bytes_read = 0;
-    ssize_t n           = 0;
+SourceReadErrCode read_all(int fd, byte *buf, u64 buf_size) {
+    u64 bytes_left = buf_size;
+    u64 bytes_read = 0;
+    ssize_t n      = 0;
     do {
         n = read(fd, buf + bytes_read, bytes_left);
-        bytes_read += (uint64_t)n;
-        bytes_left -= (uint64_t)n;
+        bytes_read += (u64)n;
+        bytes_left -= (u64)n;
     } while (bytes_left > 0 && n > 0);
 
     if (n < 0) {
@@ -45,14 +45,14 @@ SourceReadResult read_source_from_fd(int fd) {
         return result;
     }
 
-    uint64_t size = (uint64_t)dirty_size;
+    u64 size = (u64)dirty_size;
     if (size > max_source_size) {
         result.erc = srec_FileTooLarge;
         return result;
     }
 
-    uint8_t *bytes = (uint8_t *)malloc(size);
-    if (bytes == NULL) {
+    byte *bytes = (byte *)malloc(size);
+    if (bytes == nil) {
         fatal(1, "not enough memory to hold source text");
     }
 
@@ -85,14 +85,14 @@ SourceReadResult read_source_from_file(char *path) {
     }
 
     result.source.filepath = new_str_from_cstr(path);
-    result.source.filename = new_null_str();
+    result.source.filename = new_empty_str();
     return result;
 }
 
 SourceText new_source_from_str(str s) {
     SourceText source = {
-        .filename = new_null_str(),
-        .filepath = new_null_str(),
+        .filename = new_empty_str(),
+        .filepath = new_empty_str(),
         .text     = s,
     };
     return source;

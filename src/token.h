@@ -1,10 +1,9 @@
 #ifndef KU_TOKEN_H
 #define KU_TOKEN_H
 
-#include <stdint.h>
-
 #include "position.h"
 #include "str.h"
+#include "types.h"
 
 typedef enum TokenType TokenType;
 typedef struct Token Token;

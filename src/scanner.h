@@ -1,12 +1,11 @@
 #ifndef KU_SCANNER_H
 #define KU_SCANNER_H
 
-#include <stdbool.h>
-
 #include "byte_reader.h"
 #include "position.h"
 #include "source.h"
 #include "token.h"
+#include "types.h"
 
 typedef struct Scanner Scanner;
 
