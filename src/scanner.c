@@ -439,6 +439,96 @@ Token scan_colon_start(Scanner *s) {
     return token;
 }
 
+Token scan_equal_sign_start(Scanner *s) {
+    Token token;
+
+    if (s->next_code == '=') {
+        token = create_token_at_scanner_position(s, tt_Equal);
+        advance_scanner(s);
+        advance_scanner(s);
+    } else {
+        token = create_token_at_scanner_position(s, tt_Assign);
+        advance_scanner(s);
+    }
+
+    return token;
+}
+
+Token scan_less_start(Scanner *s) {
+    Token token;
+
+    if (s->next_code == '=') {
+        token = create_token_at_scanner_position(s, tt_LessOrEqual);
+        advance_scanner(s);
+        advance_scanner(s);
+    } else {
+        token = create_token_at_scanner_position(s, tt_Less);
+        advance_scanner(s);
+    }
+
+    return token;
+}
+
+Token scan_greater_start(Scanner *s) {
+    Token token;
+
+    if (s->next_code == '=') {
+        token = create_token_at_scanner_position(s, tt_GreaterOrEqual);
+        advance_scanner(s);
+        advance_scanner(s);
+    } else {
+        token = create_token_at_scanner_position(s, tt_Greater);
+        advance_scanner(s);
+    }
+
+    return token;
+}
+
+Token scan_ampersand_start(Scanner *s) {
+    Token token;
+
+    if (s->next_code == '&') {
+        token = create_token_at_scanner_position(s, tt_LogicalAnd);
+        advance_scanner(s);
+        advance_scanner(s);
+    } else {
+        token = create_token_at_scanner_position(s, tt_Ampersand);
+        advance_scanner(s);
+    }
+
+    return token;
+}
+
+Token scan_not_start(Scanner *s) {
+    Token token;
+
+    if (s->next_code == '=') {
+        token = create_token_at_scanner_position(s, tt_NotEqual);
+        advance_scanner(s);
+        advance_scanner(s);
+    } else {
+        token = create_token_at_scanner_position(s, tt_Not);
+        advance_scanner(s);
+    }
+
+    return token;
+}
+
+Token scan_pipe_start(Scanner *s) {
+    Token token;
+
+    if (s->next_code == '|') {
+        token = create_token_at_scanner_position(s, tt_LogicalOr);
+        advance_scanner(s);
+        advance_scanner(s);
+    } else {
+        token = create_token_at_scanner_position(s, tt_Pipe);
+        advance_scanner(s);
+    }
+
+    return token;
+}
+
 Token scan_plus_start(Scanner *s) {
     Token token;
 
@@ -452,6 +542,25 @@ Token scan_plus_start(Scanner *s) {
         advance_scanner(s);
     } else {
         token = create_token_at_scanner_position(s, tt_Plus);
+        advance_scanner(s);
+    }
+
+    return token;
+}
+
+Token scan_minus_start(Scanner *s) {
+    Token token;
+
+    if (s->next_code == '=') {
+        token = create_token_at_scanner_position(s, tt_SubtractAssign);
+        advance_scanner(s);
+        advance_scanner(s);
+    } else if (s->next_code == '-') {
+        token = create_token_at_scanner_position(s, tt_Decrement);
+        advance_scanner(s);
+        advance_scanner(s);
+    } else {
+        token = create_token_at_scanner_position(s, tt_Minus);
         advance_scanner(s);
     }
 
@@ -486,15 +595,17 @@ Token scan_other(Scanner *s) {
     case ']':
         return scan_single_byte_token(s, tt_RightSquareBracket);
     case '<':
-        return scan_single_byte_token(s, tt_Less);
+        return scan_less_start(s);
     case '>':
-        return scan_single_byte_token(s, tt_Greater);
+        return scan_greater_start(s);
     case '+':
         return scan_plus_start(s);
+    case '-':
+        return scan_minus_start(s);
     case ',':
         return scan_single_byte_token(s, tt_Comma);
     case '=':
-        return scan_single_byte_token(s, tt_Assign);
+        return scan_equal_sign_start(s);
     case ':':
         return scan_colon_start(s);
     case ';':
@@ -506,11 +617,13 @@ Token scan_other(Scanner *s) {
     case '*':
         return scan_single_byte_token(s, tt_Asterisk);
     case '&':
-        return scan_single_byte_token(s, tt_Ampersand);
+        return scan_ampersand_start(s);
     case '/':
         return scan_single_byte_token(s, tt_Slash);
     case '!':
-        return scan_single_byte_token(s, tt_Not);
+        return scan_not_start(s);
+    case '|':
+        return scan_pipe_start(s);
     default:
         return scan_illegal_byte_token(s);
     }
