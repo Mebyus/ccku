@@ -15,15 +15,16 @@ CC = cc
 CSTANDARD = 11
 OPTIMIZATION = 3
 CPPFLAGS = -MMD -MP -MF
+WARNINGS = -Wall -Wextra -Wconversion -Wunreachable-code -Wshadow -Wundef -Wfloat-equal -Wformat -Wpointer-arith -Winit-self
 
 ifeq (${DEBUG}, true)
 	TARGET_BIN_DIR = ${BIN_DIR}/${DEBUG_DIR}
 	TARGET_OBJ_DIR = ${OBJ_DIR}/${DEBUG_DIR}
-	CFLAGS = -Wall -Wextra -Wconversion -Werror -std=c${CSTANDARD} -g
+	CFLAGS = ${WARNINGS} -Werror -std=c${CSTANDARD} -g
 else
 	TARGET_BIN_DIR = ${BIN_DIR}/${RELEASE_DIR}
 	TARGET_OBJ_DIR = ${OBJ_DIR}/${RELEASE_DIR}
-	CFLAGS = -Wall -Wextra -Wconversion -Werror -std=c${CSTANDARD} -O${OPTIMIZATION}
+	CFLAGS = ${WARNINGS} -Werror -std=c${CSTANDARD} -O${OPTIMIZATION}
 endif
 
 $(shell mkdir -p ${TARGET_BIN_DIR})
