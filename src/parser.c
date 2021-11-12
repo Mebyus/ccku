@@ -66,12 +66,12 @@ Expression parse_expression(Parser *p) {
 }
 
 Statement parse_define_statement(Parser *p) {
-    slice_of_Expressions left = new_null_slice_of_Expressions();
+    slice_of_Expressions left = new_empty_slice_of_Expressions();
     append_Expression_to_slice(&left, parse_expression(p));
 
     advance_parser(p); // consume ":=" token
 
-    slice_of_Expressions right = new_null_slice_of_Expressions();
+    slice_of_Expressions right = new_empty_slice_of_Expressions();
     append_Expression_to_slice(&right, parse_expression(p));
 
     advance_parser(p); // consume ";" token
@@ -86,7 +86,7 @@ Statement parse_call_statement(Parser *p) {
     advance_parser(p); // consume identifier token
     advance_parser(p); // consume "(" token
 
-    slice_of_Expressions args = new_null_slice_of_Expressions();
+    slice_of_Expressions args = new_empty_slice_of_Expressions();
 
     append_Expression_to_slice(&args, parse_expression(p));
 
@@ -130,7 +130,7 @@ slice_of_Statements parse_source(SourceText source) {
 }
 
 slice_of_Statements parse(Parser *p) {
-    slice_of_Statements s = new_null_slice_of_Statements();
+    slice_of_Statements s = new_empty_slice_of_Statements();
     advance_parser(p);
     advance_parser(p);
     while (p->token.type != tt_EOF) {

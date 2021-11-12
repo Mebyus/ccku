@@ -23,12 +23,12 @@ u32 get_new_cap(u32 cap);
         u32 len;                                                                                                       \
         u32 cap;                                                                                                       \
     };                                                                                                                 \
-    slice_of_##type##s new_null_slice_of_##type##s();                                                                  \
+    slice_of_##type##s new_empty_slice_of_##type##s();                                                                 \
     void append_##type##_to_slice(slice_of_##type##s *s, type x);                                                      \
     void free_slice_of_##type##s(slice_of_##type##s s);
 
 #define IMPLEMENT_SLICE(type)                                                                                          \
-    slice_of_##type##s new_null_slice_of_##type##s() {                                                                 \
+    slice_of_##type##s new_empty_slice_of_##type##s() {                                                                \
         slice_of_##type##s s = {                                                                                       \
             .is_owner = false,                                                                                         \
             .elem     = nil,                                                                                           \
@@ -38,7 +38,7 @@ u32 get_new_cap(u32 cap);
         return s;                                                                                                      \
     }                                                                                                                  \
                                                                                                                        \
-    bool is_null_slice_of_##type##s(slice_of_##type##s s) {                                                            \
+    bool is_empty_slice_of_##type##s(slice_of_##type##s s) {                                                           \
         return s.elem == nil;                                                                                          \
     }                                                                                                                  \
                                                                                                                        \
