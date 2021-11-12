@@ -1,46 +1,54 @@
 #include "ast.h"
 
-// Language syntax in Backus-Naur form
+// Language syntax in Backus-Naur extended form
 //
-// <SourceText> => <ModuleClause>, [<ImportClause>], { <TopLevelDeclaration> }, <EOF>;
+// <SourceText> = <ModuleClause>, [<ImportClause>], { <TopLevelDeclaration> }, <EOF>
 //
-// <ModuleClause> => "module", <Identifier>, ";";
+// <ModuleClause> = "module", <Identifier>, <TERM>
 //
-// <TopLevelDeclaration> => <ConstDeclaration> | <TypeDeclaration> | <VarDeclaration> | <FunctionDeclaration>
+// <TopLevelDeclaration> = <ConstDeclaration> | <TypeDeclaration> | <VarDeclaration> | <FunctionDeclaration>
 //
-// <BlockStatement> => "{", <StatementList>, "}";
+// <ConstDeclaration> = "const", <ConstSpec>
 //
-// <StatementList> => { <Statement> };
+// <ConstSpec> = <SingleLineConstSpec> | <MultiLineConstSpec>
 //
-// <Statement> => <BlockStatement> | <AssignStatement> | <DefineStatement> | <IfStatement>
-//                <DeferStatement> | <ExpressionStatement> | <ReturnStatement> | <MatchStatement>;
+// <SingleLineConstSpec> = <IdentifierList>, [ <Type> ], "=", <ExpressionList>, <TERM>
 //
-// <DeferStatement> => "defer", <DeferClause>;
+// <MultiLineConstSpec> = <SingleLineConstSpec>, { <SingleLineConstSpec> }
 //
-// <IfStatement> => <IfClause>, { <ElifClause> }, [ <ElseClause> ];
+// <BlockStatement> = "{", <StatementList>, "}"
 //
-// <IfClause> => "if", <Expression>, <BlockStatement>;
+// <StatementList> = { <Statement> };
 //
-// <ElifClause> => "elif", <Expression>, <BlockStatement>;
+// <Statement> = <BlockStatement> | <AssignStatement> | <DefineStatement> | <IfStatement> |
+//               <DeferStatement> | <ExpressionStatement> | <ReturnStatement> | <MatchStatement>;
 //
-// <ElseClause> => "else", <BlockStatement>;
+// <DeferStatement> = "defer", <DeferClause>;
 //
-// <ExpressionStatement> => <Expression>, ";";
+// <IfStatement> = <IfClause>, { <ElifClause> }, [ <ElseClause> ];
 //
-// <DeferClause> => <CallExpression>, ";" | <BlockStatement>;
+// <IfClause> = "if", <Expression>, <BlockStatement>;
 //
-// <DefineStatement> => [ "imt" ], <Identifier>, { ",", <Identifier> }, ":=", <Expression>, { ",", <Expression> }, ";";
+// <ElifClause> = "elif", <Expression>, <BlockStatement>;
 //
-// <SelectorExpression> => <Expression>, ".", <Identifier>
+// <ElseClause> = "else", <BlockStatement>;
 //
-// <CallExpression> => <Expression>, "(", { <Expression>, "," }, ")";
+// <ExpressionStatement> = <Expression>, ";";
 //
-// <DestinationExpression> => <IndexExpression> | <Identifier>
+// <DeferClause> = <CallExpression>, <TERM> | <BlockStatement>;
 //
-// <AssignStatement> => <DestinationExpression>, { ",", <DestinationExpression> }, "=", <Expression>, { ",",
-//                      <Expression> }, ";";
+// <DefineStatement> = [ "imt" ], <Identifier>, { ",", <Identifier> }, ":=", <Expression>, { ",", <Expression> }, ";";
 //
-// <ReturnStatement> => "return", [ <Expression> ], ";";
+// <SelectorExpression> = <Expression>, ".", <Identifier>
+//
+// <CallExpression> = <Expression>, "(", { <Expression>, "," }, ")";
+//
+// <DestinationExpression> = <IndexExpression> | <Identifier>
+//
+// <AssignStatement> = <DestinationExpression>, { ",", <DestinationExpression> }, "=", <Expression>, { ",",
+//                     <Expression> }, ";";
+//
+// <ReturnStatement> = "return", [ <Expression> ], ";";
 
 Statement init_empty_statement() {
     Statement stmt = {
