@@ -682,7 +682,7 @@ Token scan_token(Scanner *s) {
 
     if (s->insert_terminator) {
         skip_space(s);
-        if (s->code == ReaderEOF || s->code == '}') {
+        if (s->code == ReaderEOF || s->code == '}' || (s->code == '/' && s->next_code == '/')) {
             s->insert_terminator = false;
             token                = create_token_at_scanner_position(s, tt_Terminator);
             return token;
