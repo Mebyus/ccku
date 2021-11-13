@@ -190,7 +190,7 @@ Token scan_name(Scanner *s) {
     token.literal = slice_from_str_byte_reader_mark(&s->reader);
 
     TokenLookupResult keyword_lookup_result = lookup_keyword(token.literal);
-    if (keyword_lookup_result.found) {
+    if (keyword_lookup_result.ok) {
         token.type = keyword_lookup_result.type;
     } else {
         token.type = tt_Identifier;

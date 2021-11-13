@@ -28,6 +28,8 @@ enum TokenType {
     tt_end_no_static_literal,
 
     // Operators and/or punctuators
+    tt_begin_operator,
+
     tt_BlankIdentifier, // _
     tt_Plus,            // +
     tt_Minus,           // -
@@ -77,6 +79,8 @@ enum TokenType {
     tt_RightSquareBracket, // ]
     tt_LeftRoundBracket,   // (
     tt_RightRoundBracket,  // )
+
+    tt_end_operator,
 
     // Keywords
     tt_begin_keyword,
@@ -133,7 +137,7 @@ struct Token {
 };
 
 struct TokenLookupResult {
-    bool found;
+    bool ok;
     TokenType type;
 };
 

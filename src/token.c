@@ -117,7 +117,7 @@ Token create_token(TokenType type, Position pos) {
 TokenLookupResult lookup_keyword(str s) {
     TokenLookupResult result;
     if (s.len < min_keyword_length || s.len > max_keyword_length) {
-        result.found = false;
+        result.ok = false;
         return result;
     }
 
@@ -125,18 +125,18 @@ TokenLookupResult lookup_keyword(str s) {
         str keyword_str = token_type_str[token_type];
         bool found      = are_strs_equal(s, keyword_str);
         if (found) {
-            result.found = true;
+            result.ok = true;
             result.type  = token_type;
             return result;
         }
     }
 
-    result.found = false;
+    result.ok = false;
     return result;
 }
 
 TokenLookupResult lookup_token(str s) {
-    
+
 }
 
 bool are_tokens_equal(Token t1, Token t2) {
