@@ -24,7 +24,7 @@ const byte small_decimals_string[200] = "00010203040506070809"
                                         "80818283848586878889"
                                         "90919293949596979899";
 
-str new_empty_str() {
+str init_empty_str() {
     str s = {
         .is_owner = false,
         .bytes    = nil,
@@ -48,7 +48,7 @@ str borrow_str_from_bytes_no_check(const byte *bytes, u64 size) {
 
 str new_str_from_buf(char *buf, u64 size) {
     if (size == 0) {
-        return new_empty_str();
+        return init_empty_str();
     } else if (size == 1) {
         return new_str_from_byte((byte)buf[0]);
     }
@@ -75,7 +75,7 @@ str new_str_from_cstr(char *cstr) {
 
 str new_str_from_bytes(byte *bytes, u64 size) {
     if (size == 0) {
-        return new_empty_str();
+        return init_empty_str();
     } else if (size == 1) {
         return new_str_from_byte(bytes[0]);
     }
@@ -141,9 +141,13 @@ str take_str_from_str(str *s) {
 
 str borrow_str_from_bytes(const byte *bytes, u64 size) {
     if (size == 0) {
-        return new_empty_str();
+        return init_empty_str();
     }
     return borrow_str_from_bytes_no_check(bytes, size);
+}
+
+str borrow_str_slice(str s, u64 start, u64 end) {
+    return borrow_str_from_bytes(s.bytes + start, end - start);
 }
 
 byte decimal_digit_to_charcode(u8 digit) {
@@ -245,7 +249,7 @@ u64 parse_u64_from_hexadecimal_no_checks(str s) {
 
 str copy_str(str s) {
     if (s.len == 0) {
-        return new_empty_str();
+        return init_empty_str();
     } else if (s.len == 1) {
         return new_str_from_byte(s.bytes[0]);
     }
@@ -272,6 +276,35 @@ bool are_strs_equal(str s1, str s2) {
     u64 len = s1.len;
 
     return memcmp(s1.bytes, s2.bytes, len) == 0;
+}
+
+bool has_prefix_str(str s, str prefix) {
+    if (prefix.len > s.len) {
+        return false;
+    }
+    u64 len = prefix.len;
+
+    return memcmp(s.bytes, prefix.bytes, len) == 0;
+}
+
+bool has_substr_at(str s, str substr, u64 pos) {
+    if (substr.len + pos > s.len) {
+        return false;
+    }
+    u64 len = substr.len;
+
+    return memcmp(s.bytes + pos, substr.bytes, len) == 0;
+}
+
+u64 index_byte_in_str(str s, byte b) {
+    return index_byte_in_str_from(s, b, 0);
+}
+
+u64 index_byte_in_str_from(str s, byte b, u64 pos) {
+    u64 i = pos;
+    for (; i < s.len && s.bytes[i] != b; i++) {
+    }
+    return i;
 }
 
 void print_str(str s) {

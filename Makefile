@@ -13,7 +13,7 @@ DEBUG_DIR = debug
 
 CC = cc
 CSTANDARD = 11
-OPTIMIZATION = 3
+OPTIMIZATION = 2
 CPPFLAGS = -MMD -MP -MF
 WARNINGS = -Wall -Wextra -Wconversion -Wunreachable-code -Wshadow -Wundef -Wfloat-equal -Wformat -Wpointer-arith -Winit-self
 
@@ -43,11 +43,12 @@ ${TARGET_OBJ_DIR}/charset.o
 
 .PHONY: test
 test: ${TEST_PATH}
-	${TEST_PATH} 
+	${TEST_PATH} tests/scanner/1.test
 
 ${TEST_PATH}: ${TARGET_OBJ_DIR}/test.o ${TARGET_OBJ_DIR}/source.o ${TARGET_OBJ_DIR}/scanner.o \
 ${TARGET_OBJ_DIR}/token.o ${TARGET_OBJ_DIR}/str.o ${TARGET_OBJ_DIR}/slice.o ${TARGET_OBJ_DIR}/byte_reader.o \
-${TARGET_OBJ_DIR}/position.o ${TARGET_OBJ_DIR}/charset.o ${TARGET_OBJ_DIR}/fatal.o
+${TARGET_OBJ_DIR}/position.o ${TARGET_OBJ_DIR}/charset.o ${TARGET_OBJ_DIR}/fatal.o \
+${TARGET_OBJ_DIR}/split_test_scanner.o
 	${CC} -o $@ $^
 
 ${TARGET_OBJ_DIR}/cmd.o: ${SRC_DIR}/cmd.c
@@ -105,6 +106,10 @@ ${TARGET_OBJ_DIR}/charset.o: ${SRC_DIR}/charset.c
 ${TARGET_OBJ_DIR}/timer.o: ${SRC_DIR}/timer.c
 	${CC} ${CPPFLAGS} ${DEP_DIR}/timer.d ${CFLAGS} -o $@ -c $<
 -include ${DEP_DIR}/timer.d
+
+${TARGET_OBJ_DIR}/split_test_scanner.o: ${SRC_DIR}/split_test_scanner.c
+	${CC} ${CPPFLAGS} ${DEP_DIR}/split_test_scanner.d ${CFLAGS} -o $@ -c $<
+-include ${DEP_DIR}/split_test_scanner.d
 
 .PHONY: clean
 clean:

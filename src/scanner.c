@@ -189,7 +189,7 @@ Token scan_name(Scanner *s) {
     consume_word(s);
     token.literal = slice_from_str_byte_reader_mark(&s->reader);
 
-    KeywordLookupResult keyword_lookup_result = lookup_keyword(token.literal);
+    TokenLookupResult keyword_lookup_result = lookup_keyword(token.literal);
     if (keyword_lookup_result.found) {
         token.type = keyword_lookup_result.type;
     } else {

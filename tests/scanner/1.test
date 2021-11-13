@@ -6,6 +6,7 @@ x := 12
 1:1     IDENT       x
 1:3     :=
 1:6     DECINT      12
+1:8     TERM
 1:8     EOF
 ## end
 
@@ -44,4 +45,30 @@ print("Hello, world!")
 1:22    )
 1:23    TERM
 1:23    EOF
+## end
+
+## id: 5
+## label: empty program
+## program:
+
+## tokens:
+1:1     EOF
+## end
+
+## id: 6
+## label: decimal integer
+## program:
+325290
+## tokens:
+1:1     DECINT      325290
+1:7     EOF
+## end
+
+## id: 7
+## label: decimal float
+## program:
+325.290
+## tokens:
+1:1     DECINT      325.290
+1:8     EOF
 ## end

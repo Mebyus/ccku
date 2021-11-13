@@ -6,9 +6,21 @@ const u8 min_keyword_length = 2;
 const u8 max_keyword_length = 9;
 
 str token_type_str[] = {
+    // Non static or empty literals
     [tt_Illegal]            = STR("ILLEGAL"),
+    [tt_Comment]            = STR("COMMENT"),
     [tt_EOF]                = STR("EOF"),
     [tt_Terminator]         = STR("TERM"),
+    [tt_Identifier]         = STR("IDENT"),
+    [tt_String]             = STR("STR"),
+    [tt_Character]          = STR("CHAR"),
+    [tt_BinaryInteger]      = STR("BININT"),
+    [tt_OctalInteger]       = STR("OCTINT"),
+    [tt_DecimalInteger]     = STR("DECINT"),
+    [tt_HexadecimalInteger] = STR("HEXINT"),
+    [tt_DecimalFloat]       = STR("DECFLT"),
+
+    // Operators/punctuators
     [tt_BlankIdentifier]    = STR("_"),
     [tt_Plus]               = STR("+"),
     [tt_Minus]              = STR("-"),
@@ -20,7 +32,7 @@ str token_type_str[] = {
     [tt_Decrement]          = STR("--"),
     [tt_Define]             = STR(":="),
     [tt_AddAssign]          = STR("+="),
-    [tt_SubtractAssign]    = STR("-="),
+    [tt_SubtractAssign]     = STR("-="),
     [tt_Assign]             = STR("="),
     [tt_Colon]              = STR(":"),
     [tt_Semicolon]          = STR(";"),
@@ -102,8 +114,8 @@ Token create_token(TokenType type, Position pos) {
     return token;
 }
 
-KeywordLookupResult lookup_keyword(str s) {
-    KeywordLookupResult result;
+TokenLookupResult lookup_keyword(str s) {
+    TokenLookupResult result;
     if (s.len < min_keyword_length || s.len > max_keyword_length) {
         result.found = false;
         return result;
@@ -121,6 +133,10 @@ KeywordLookupResult lookup_keyword(str s) {
 
     result.found = false;
     return result;
+}
+
+TokenLookupResult lookup_token(str s) {
+    
 }
 
 bool are_tokens_equal(Token t1, Token t2) {
