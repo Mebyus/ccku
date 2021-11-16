@@ -1,9 +1,14 @@
 #include <stdio.h>
 
+#include "map.h"
 #include "token.h"
 
 const u8 min_keyword_length = 2;
 const u8 max_keyword_length = 9;
+
+const u32 lookup_token_map_cap = 1 << 8;
+
+map_str_u64 lookup_token_map = empty_map;
 
 str token_type_str[] = {
     // Non static or empty literals
@@ -125,18 +130,14 @@ TokenLookupResult lookup_keyword(str s) {
         str keyword_str = token_type_str[token_type];
         bool found      = are_strs_equal(s, keyword_str);
         if (found) {
-            result.ok = true;
-            result.type  = token_type;
+            result.ok   = true;
+            result.type = token_type;
             return result;
         }
     }
 
     result.ok = false;
     return result;
-}
-
-TokenLookupResult lookup_token(str s) {
-
 }
 
 bool are_tokens_equal(Token t1, Token t2) {
@@ -149,6 +150,36 @@ bool are_tokens_equal(Token t1, Token t2) {
         return true;
     }
     return are_strs_equal(t1.literal, t2.literal);
+}
+
+map_str_u64 create_token_lookup_map() {
+    map_str_u64 m = new_map_str_u64(lookup_token_map_cap);
+    for (u64 type = tt_begin_no_static_literal + 1; type < tt_end_no_static_literal; type++) {
+        put_map_str_u64(&m, token_type_str[type], type);
+    }
+    for (u64 type = tt_begin_operator + 1; type < tt_end_operator; type++) {
+        put_map_str_u64(&m, token_type_str[type], type);
+    }
+    for (u64 type = tt_begin_keyword + 1; type < tt_end_keyword; type++) {
+        put_map_str_u64(&m, token_type_str[type], type);
+    }
+    put_map_str_u64(&m, token_type_str[tt_Terminator], tt_Terminator);
+    put_map_str_u64(&m, token_type_str[tt_EOF], tt_EOF);
+    printf("map cap: %d\n", m.cap);
+    printf("map len: %d\n", m.len);
+    printf("map col: %d\n", m.col);
+    return m;
+}
+
+TokenLookupResult lookup_token(str s) {
+    if (lookup_token_map.buck == nil) {
+        lookup_token_map = create_token_lookup_map();
+    }
+    TokenLookupResult lookup_res;
+    result_u64 res  = get_map_str_u64(lookup_token_map, s);
+    lookup_res.ok   = res.ok;
+    lookup_res.type = res.val;
+    return lookup_res;
 }
 
 void print_token(Token token) {

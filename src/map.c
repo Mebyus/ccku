@@ -29,15 +29,30 @@ bucket_u64 *new_bucket_u64(str key, u64 val) {
     return buck;
 }
 
-u32 hash_str(str s, u32 cap) {
-    u32 h = 0;
-    for (u64 i = 0; i < s.len; i++) {
-        h += s.bytes[i];
+u32 fnv_hash_1a_u32(byte *bytes, u64 len) {
+    u32 h = 0x811c9dc5;
+    for (u64 i = 0; i < len; i++) {
+        h = (h ^ bytes[i]) * 0x01000193;
     }
-    return h % cap;
+    return h;
 }
 
-result_u64 map_str(map_str_u64 m, str key) {
+// unsigned long long fnv_hash_1a_64(void *key, int len) {
+//     unsigned char *p     = key;
+//     unsigned long long h = 0xcbf29ce484222325ULL;
+//     int i;
+
+//     for (i = 0; i < len; i++)
+//         h = (h ^ p[i]) * 0x100000001b3ULL;
+
+//     return h;
+// }
+
+u32 hash_str(str s, u32 cap) {
+    return fnv_hash_1a_u32(s.bytes, s.len) % cap;
+}
+
+result_u64 get_map_str_u64(map_str_u64 m, str key) {
     result_u64 res;
     u32 h            = hash_str(key, m.cap);
     bucket_u64 *buck = m.buck[h];
@@ -65,8 +80,10 @@ void put_map_str_u64(map_str_u64 *m, str key, u64 val) {
         prev_buck = buck;
         buck      = buck->next;
     }
+    m->len++;
     bucket_u64 *new_buck = new_bucket_u64(key, val);
     if (prev_buck != nil) {
+        m->col++;
         prev_buck->next = new_buck;
         return;
     }

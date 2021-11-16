@@ -50,6 +50,8 @@ void run_test_cases(slice_of_ScannerTestCases test_cases) {
 }
 
 int main(int argc, char **argv) {
+    str s = STR("return");
+    lookup_token(s);
     if (argc < 2) {
         fatal(1, "not enough arguments");
     }
@@ -81,7 +83,6 @@ int main(int argc, char **argv) {
             if (wait_for_program) {
                 test_case.source_str = text;
             } else {
-                
             }
         }
     }
