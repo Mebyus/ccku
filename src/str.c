@@ -24,14 +24,7 @@ const byte small_decimals_string[200] = "00010203040506070809"
                                         "80818283848586878889"
                                         "90919293949596979899";
 
-str init_empty_str() {
-    str s = {
-        .is_owner = false,
-        .bytes    = nil,
-        .len      = 0,
-    };
-    return s;
-}
+const str empty_str = {.bytes = nil, .len = 0, .is_owner = false};
 
 bool is_empty_str(str s) {
     return s.bytes == nil;
@@ -48,7 +41,7 @@ str borrow_str_from_bytes_no_check(const byte *bytes, u64 size) {
 
 str new_str_from_buf(char *buf, u64 size) {
     if (size == 0) {
-        return init_empty_str();
+        return empty_str;
     } else if (size == 1) {
         return new_str_from_byte((byte)buf[0]);
     }
@@ -75,7 +68,7 @@ str new_str_from_cstr(char *cstr) {
 
 str new_str_from_bytes(byte *bytes, u64 size) {
     if (size == 0) {
-        return init_empty_str();
+        return empty_str;
     } else if (size == 1) {
         return new_str_from_byte(bytes[0]);
     }
@@ -141,13 +134,17 @@ str take_str_from_str(str *s) {
 
 str borrow_str_from_bytes(const byte *bytes, u64 size) {
     if (size == 0) {
-        return init_empty_str();
+        return empty_str;
     }
     return borrow_str_from_bytes_no_check(bytes, size);
 }
 
 str borrow_str_slice(str s, u64 start, u64 end) {
     return borrow_str_from_bytes(s.bytes + start, end - start);
+}
+
+str borrow_str_slice_to_end(str s, u64 start) {
+    return borrow_str_slice(s, start, s.len);
 }
 
 byte decimal_digit_to_charcode(u8 digit) {
@@ -249,7 +246,7 @@ u64 parse_u64_from_hexadecimal_no_checks(str s) {
 
 str copy_str(str s) {
     if (s.len == 0) {
-        return init_empty_str();
+        return empty_str;
     } else if (s.len == 1) {
         return new_str_from_byte(s.bytes[0]);
     }

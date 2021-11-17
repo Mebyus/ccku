@@ -14,7 +14,8 @@ struct str {
     u64 len;
 };
 
-str init_empty_str();
+extern const str empty_str;
+
 str new_str_from_cstr(char *s);
 str new_str_from_buf(char *buf, u64 size);
 str new_str_from_bytes(byte *bytes, u64 size);
@@ -27,6 +28,7 @@ str take_str_from_bytes(byte *bytes, u64 size);
 str take_str_from_str(str *s);
 str borrow_str_from_bytes(const byte *bytes, u64 size);
 str borrow_str_slice(str s, u64 start, u64 end);
+str borrow_str_slice_to_end(str s, u64 start);
 str copy_str(str s);
 str format_u32_as_decimal(u32 n);
 str format_u64_as_decimal(u64 n);

@@ -135,14 +135,14 @@ SourceReadResult read_source_from_file(char *path) {
     }
 
     result.source.filepath = new_str_from_cstr(path);
-    result.source.filename = init_empty_str();
+    result.source.filename = empty_str;
     return result;
 }
 
 SourceText new_source_from_str(str s) {
     SourceText source = {
-        .filename = init_empty_str(),
-        .filepath = init_empty_str(),
+        .filename = empty_str,
+        .filepath = empty_str,
         .text     = s,
     };
     return source;
