@@ -8,6 +8,7 @@
 typedef enum TokenType TokenType;
 typedef struct Token Token;
 typedef struct TokenLookupResult TokenLookupResult;
+typedef struct TokenParseResult TokenParseResult;
 
 enum TokenType {
     tt_begin_no_static_literal,
@@ -141,10 +142,16 @@ struct TokenLookupResult {
     TokenType type;
 };
 
+struct TokenParseResult {
+    bool ok;
+    Token token;
+};
+
 Token create_token(TokenType type, Position pos);
 Token create_token_with_literal(TokenType type, Position pos, str literal);
 TokenLookupResult lookup_keyword(str s);
 TokenLookupResult lookup_token(str s);
+TokenParseResult parse_token_from_str(str s);
 bool are_tokens_equal(Token t1, Token t2);
 void print_token(Token token);
 void free_token(Token token);

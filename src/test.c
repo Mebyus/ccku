@@ -2,6 +2,7 @@
 #include "slice.h"
 #include "split_test_scanner.h"
 #include "types.h"
+#include <stdio.h>
 
 TYPEDEF_SLICE(Token);
 IMPLEMENT_SLICE(Token);
@@ -51,7 +52,10 @@ void run_test_cases(slice_of_ScannerTestCases test_cases) {
 
 int main(int argc, char **argv) {
     str s = STR("return");
+    str n = STR("123");
     lookup_token(s);
+    U64ParseResult res = parse_uint64_from_decimal(n);
+    printf("%d %ld %ld\n", res.ok, res.num, sizeof(U64ParseResult));
     if (argc < 2) {
         fatal(1, "not enough arguments");
     }

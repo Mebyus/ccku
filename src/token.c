@@ -182,6 +182,19 @@ TokenLookupResult lookup_token(str s) {
     return lookup_res;
 }
 
+TokenParseResult parse_token_from_str(str s) {
+    TokenParseResult res;
+    u64 i = index_byte_in_str_from(s, ':', 0);
+    if (i >= s.len) {
+        res.ok = false;
+        return res;
+    }
+    // str line_str = borrow_str_slice(s, 0, i);
+    res.token = (Token){.type = tt_Illegal};
+    return res;
+}
+
+
 void print_token(Token token) {
     str literal    = get_token_literal(token);
     str type_str   = format_u64_as_decimal(token.type);

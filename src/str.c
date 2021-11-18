@@ -244,6 +244,28 @@ u64 parse_u64_from_hexadecimal_no_checks(str s) {
     return num;
 }
 
+U64ParseResult parse_uint64_from_decimal(str s) {
+    U64ParseResult res;
+    if (s.len == 0 || s.len > max_u64_decimal_length) {
+        res.ok = false;
+        return res;
+    }
+    u64 num = 0;
+    for (u64 i = 0; i < s.len; i++) {
+        num *= 10;
+        byte b = s.bytes[i];
+        if (b < '0' || b > '9') {
+            res.ok = false;
+            return res;
+        }
+        u8 digit = (u8)(b - '0');
+        num += digit;
+    }
+    res.ok  = true;
+    res.num = num;
+    return res;
+}
+
 str copy_str(str s) {
     if (s.len == 0) {
         return empty_str;
@@ -291,6 +313,17 @@ bool has_substr_at(str s, str substr, u64 pos) {
     u64 len = substr.len;
 
     return memcmp(s.bytes + pos, substr.bytes, len) == 0;
+}
+
+u64 index_other_byte_in_str(str s, byte b) {
+    return index_other_byte_in_str_from(s, b, 0);
+}
+
+u64 index_other_byte_in_str_from(str s, byte b, u64 pos) {
+    u64 i = pos;
+    for (; i < s.len && s.bytes[i] == b; i++) {
+    }
+    return i;
 }
 
 u64 index_byte_in_str(str s, byte b) {
