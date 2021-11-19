@@ -10,7 +10,8 @@ struct Position {
     u32 column;
 };
 
-Position init_null_position();
+extern const Position null_position;
+
 Position init_position(u32 line, u32 column);
 Position next_line(Position pos);
 Position next_column(Position pos);

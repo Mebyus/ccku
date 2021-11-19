@@ -59,7 +59,7 @@ Scanner *new_scanner_from_source(SourceText source) {
     s->prefetched        = false;
     s->insert_terminator = false;
     s->insert_blocked    = false;
-    s->pos               = init_null_position();
+    s->pos               = null_position;
     s->prev_code         = ReaderBOF;
     s->code              = ReaderBOF;
     s->next_code         = ReaderBOF;
@@ -77,7 +77,7 @@ Scanner init_scanner_from_source(SourceText source) {
         .prefetched        = false,
         .insert_terminator = false,
         .insert_blocked    = false,
-        .pos               = init_null_position(),
+        .pos               = null_position,
         .prev_code         = ReaderBOF,
         .code              = ReaderBOF,
         .next_code         = ReaderBOF,
@@ -92,7 +92,7 @@ Scanner init_scanner_from_str(str string) {
         .prefetched        = false,
         .insert_terminator = false,
         .insert_blocked    = false,
-        .pos               = init_null_position(),
+        .pos               = null_position,
         .prev_code         = ReaderBOF,
         .code              = ReaderBOF,
         .next_code         = ReaderBOF,

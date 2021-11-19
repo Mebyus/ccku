@@ -1,15 +1,13 @@
 #include "position.h"
 
+const Position null_position = {.line = 1, .column = 1};
+
 Position init_position(u32 line, u32 column) {
     Position pos = {
         .line   = line,
         .column = column,
     };
     return pos;
-}
-
-Position init_null_position() {
-    return init_position(1, 1);
 }
 
 Position next_line(Position pos) {
