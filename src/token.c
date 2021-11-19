@@ -245,8 +245,8 @@ TokenParseResult parse_token_from_str(str s) {
 
 void print_token(Token token) {
     str type_str   = token_type_strings[token.type];
-    str line_str   = format_u64_as_decimal(token.pos.line);
-    str column_str = format_u64_as_decimal(token.pos.column);
+    str line_str   = format_u32_as_decimal(token.pos.line);
+    str column_str = format_u32_as_decimal(token.pos.column);
 
     print_str(line_str);
     fwrite(":", 1, 1, stdout);

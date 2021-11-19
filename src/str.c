@@ -24,22 +24,22 @@ const byte small_decimals_string[200] = "00010203040506070809"
                                         "80818283848586878889"
                                         "90919293949596979899";
 
-const str empty_str = {.bytes = nil, .len = 0, .is_owner = false};
+const str empty_str = {.origin = nil, .bytes = nil, .len = 0};
 
 bool is_empty_str(str s) {
-    return s.bytes == nil;
+    return s.len == 0;
 }
 
 str borrow_str_from_bytes_no_check(const byte *bytes, u64 size) {
     str s = {
-        .is_owner = false,
-        .bytes    = (byte *)(void *)bytes, // dirty trick to avoid compiler warning
-        .len      = size,
+        .origin = nil,
+        .bytes  = (byte *)(void *)bytes, // dirty trick to avoid compiler warning
+        .len    = size,
     };
     return s;
 }
 
-str new_str_from_buf(char *buf, u64 size) {
+str new_str_from_chars(char *buf, u64 size) {
     if (size == 0) {
         return empty_str;
     } else if (size == 1) {
@@ -54,16 +54,16 @@ str new_str_from_buf(char *buf, u64 size) {
     memcpy(bytes, buf, size);
 
     str s = {
-        .is_owner = true,
-        .bytes    = bytes,
-        .len      = size,
+        .origin = bytes,
+        .bytes  = bytes,
+        .len    = size,
     };
     return s;
 }
 
 str new_str_from_cstr(char *cstr) {
     u64 len = strlen(cstr);
-    return new_str_from_buf(cstr, len);
+    return new_str_from_chars(cstr, len);
 }
 
 str new_str_from_bytes(byte *bytes, u64 size) {
@@ -81,9 +81,9 @@ str new_str_from_bytes(byte *bytes, u64 size) {
     memcpy(b, bytes, size);
 
     str s = {
-        .is_owner = true,
-        .bytes    = b,
-        .len      = size,
+        .origin = b,
+        .bytes  = b,
+        .len    = size,
     };
     return s;
 }
@@ -100,35 +100,35 @@ str new_str_slice_to_end(str s, u64 start) {
     return new_str_slice(s, start, s.len);
 }
 
-str take_str_from_buf(char *buf, u64 size) {
+str take_str_from_chars(char *buf, u64 size) {
     str s = {
-        .is_owner = true,
-        .bytes    = (byte *)buf,
-        .len      = size,
+        .origin = buf,
+        .bytes  = (byte *)buf,
+        .len    = size,
     };
     return s;
 }
 
 str take_str_from_bytes(byte *bytes, u64 size) {
     str s = {
-        .is_owner = true,
-        .bytes    = bytes,
-        .len      = size,
+        .origin = bytes,
+        .bytes  = bytes,
+        .len    = size,
     };
     return s;
 }
 
 str take_str_from_cstr(char *cstr) {
-    return take_str_from_buf(cstr, strlen(cstr));
+    return take_str_from_chars(cstr, strlen(cstr));
 }
 
 str take_str_from_str(str *s) {
     str new_str = {
-        .is_owner = s->is_owner,
-        .bytes    = s->bytes,
-        .len      = s->len,
+        .origin = s->origin,
+        .bytes  = s->bytes,
+        .len    = s->len,
     };
-    s->is_owner = false;
+    s->origin = nil;
     return new_str;
 }
 
@@ -141,6 +141,10 @@ str borrow_str_from_bytes(const byte *bytes, u64 size) {
 
 str borrow_str_slice(str s, u64 start, u64 end) {
     return borrow_str_from_bytes(s.bytes + start, end - start);
+}
+
+str borrow_str_slice_from_start(str s, u64 end) {
+    return borrow_str_slice(s, 0, end);
 }
 
 str borrow_str_slice_to_end(str s, u64 start) {
@@ -195,6 +199,25 @@ str format_small_decimal(u8 n) {
     return borrow_str_from_bytes_no_check(small_decimals_string + n * 2, 2);
 }
 
+str format_u32_as_decimal(u32 n) {
+    if (n <= max_small_decimal) {
+        return format_small_decimal((u8)n);
+    }
+
+    byte *bytes = (byte *)malloc(max_u32_decimal_length);
+    if (bytes == nil) {
+        fatal(1, "not enough memory for new string");
+    }
+
+    u64 len = (u64)format_u64_decimal_to_buf(n, bytes);
+    str s   = {
+        .origin = bytes,
+        .bytes  = bytes,
+        .len    = len,
+    };
+    return s;
+}
+
 str format_u64_as_decimal(u64 n) {
     if (n <= max_small_decimal) {
         return format_small_decimal((u8)n);
@@ -207,9 +230,9 @@ str format_u64_as_decimal(u64 n) {
 
     u64 len = (u64)format_u64_decimal_to_buf(n, bytes);
     str s   = {
-        .is_owner = true,
-        .bytes    = bytes,
-        .len      = len,
+        .origin = bytes,
+        .bytes  = bytes,
+        .len    = len,
     };
     return s;
 }
@@ -288,7 +311,7 @@ U64ParseResult parse_u64_from_decimal(str s) {
     return res;
 }
 
-str copy_str(str s) {
+str new_str_from_str(str s) {
     if (s.len == 0) {
         return empty_str;
     } else if (s.len == 1) {
@@ -303,9 +326,9 @@ str copy_str(str s) {
     memcpy(bytes, s.bytes, s.len);
 
     str cp = {
-        .is_owner = true,
-        .bytes    = bytes,
-        .len      = s.len,
+        .origin = bytes,
+        .bytes  = bytes,
+        .len    = s.len,
     };
     return cp;
 }
@@ -314,27 +337,21 @@ bool are_strs_equal(str s1, str s2) {
     if (s1.len != s2.len) {
         return false;
     }
-    u64 len = s1.len;
-
-    return memcmp(s1.bytes, s2.bytes, len) == 0;
+    return memcmp(s1.bytes, s2.bytes, s1.len) == 0;
 }
 
 bool has_prefix_str(str s, str prefix) {
     if (prefix.len > s.len) {
         return false;
     }
-    u64 len = prefix.len;
-
-    return memcmp(s.bytes, prefix.bytes, len) == 0;
+    return memcmp(s.bytes, prefix.bytes, prefix.len) == 0;
 }
 
 bool has_substr_at(str s, str substr, u64 pos) {
     if (substr.len + pos > s.len) {
         return false;
     }
-    u64 len = substr.len;
-
-    return memcmp(s.bytes + pos, substr.bytes, len) == 0;
+    return memcmp(s.bytes + pos, substr.bytes, substr.len) == 0;
 }
 
 u64 index_other_byte_in_str(str s, byte b) {
@@ -376,7 +393,8 @@ void println() {
 };
 
 void free_str(str s) {
-    if (s.is_owner) {
-        free(s.bytes);
+    if (s.origin == nil) {
+        return;
     }
+    free(s.origin);
 }
