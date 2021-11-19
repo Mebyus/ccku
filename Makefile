@@ -17,7 +17,7 @@ OPTIMIZATION = 2
 CPPFLAGS = -MMD -MP -MF
 WARNINGS = -Wall -Wextra -Wconversion -Wunreachable-code -Wshadow -Wundef -Wfloat-equal -Wformat -Wpointer-arith -Winit-self
 
-ifeq (${DEBUG}, true)
+ifeq (${BUILD}, debug)
 	TARGET_BIN_DIR = ${BIN_DIR}/${DEBUG_DIR}
 	TARGET_OBJ_DIR = ${OBJ_DIR}/${DEBUG_DIR}
 	CFLAGS = ${WARNINGS} -Werror -std=c${CSTANDARD} -g

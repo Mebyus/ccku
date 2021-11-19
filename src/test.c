@@ -11,7 +11,7 @@ IMPLEMENT_SLICE(Token);
 typedef struct ScannerTestCase ScannerTestCase;
 
 struct ScannerTestCase {
-    u64 id;
+    str id;
     str label;
     str source_str;
     slice_of_Tokens want_tokens;
@@ -27,7 +27,7 @@ const str tokens_control_line  = STR("## tokens:");
 const str end_control_line     = STR("## end");
 
 
-const str warn_str = STR("Tokens do not match in test case: ");
+const str warn_str = STR("Test case: ");
 const str want_str = STR("Want: ");
 const str got_str  = STR("Got:  ");
 
@@ -42,7 +42,10 @@ void run_test_cases(slice_of_ScannerTestCases test_cases) {
             Token got_token  = scan_token(s);
             if (!are_tokens_equal(want_token, got_token)) {
                 print_str(warn_str);
-                println_str(test_case.label);
+                print_str(test_case.id);
+                fwrite(" (", 1, 2, stdout);
+                print_str(test_case.label);
+                fwrite(")\n", 1, 2, stdout);
                 print_str(want_str);
                 print_token(want_token);
                 print_str(got_str);
@@ -100,7 +103,7 @@ int main(int argc, char **argv) {
                 append_ScannerTestCase_to_slice(&test_cases, test_case);
                 test_case.want_tokens = empty_slice_of_Tokens;
             } else if (has_prefix_str(text, id_control_line)) {
-                test_case.id = 0;
+                test_case.id = borrow_str_slice_to_end(text, id_control_line.len + 1);
             } else if (has_prefix_str(text, label_control_line)) {
                 test_case.label = borrow_str_slice_to_end(text, label_control_line.len + 1);
             }
