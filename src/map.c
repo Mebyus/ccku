@@ -37,6 +37,14 @@ u32 fnv_hash_1a_u32(byte *bytes, u64 len) {
     return h;
 }
 
+u64 fnv_hash_1a_64(byte *bytes, u64 len) {
+    u64 h = 0xcbf29ce484222325ULL;
+    for (u64 i = 0; i < len; i++) {
+        h = (h ^ bytes[i]) * 0x100000001b3ULL;
+    }
+    return h;
+}
+
 u32 simple_sum_u32(byte *bytes, u64 len) {
     u32 h = 0;
     for (u64 i = 0; i < len; i++) {
@@ -44,17 +52,6 @@ u32 simple_sum_u32(byte *bytes, u64 len) {
     }
     return h;
 }
-
-// unsigned long long fnv_hash_1a_64(void *key, int len) {
-//     unsigned char *p     = key;
-//     unsigned long long h = 0xcbf29ce484222325ULL;
-//     int i;
-
-//     for (i = 0; i < len; i++)
-//         h = (h ^ p[i]) * 0x100000001b3ULL;
-
-//     return h;
-// }
 
 u32 hash_str(str s, u32 cap) {
     return simple_sum_u32(s.bytes, s.len) % cap;

@@ -3,12 +3,16 @@
 #include "map.h"
 #include "token.h"
 
-const u8 min_keyword_length = 2;
-const u8 max_keyword_length = 9;
+const u8 position_format_width   = 13;
+const u8 token_type_format_width = 15;
 
 const u32 lookup_token_map_cap = 1 << 8;
+const byte *format_space_bytes = (byte *)"                    ";
 
+// These variables should be initialized through init_token_module() call
 map_str_u64 lookup_token_map = empty_map;
+u64 min_keyword_length       = (u64)~0;
+u64 max_keyword_length       = 0;
 
 str token_type_strings[] = {
     // Non static or empty literals
@@ -95,6 +99,10 @@ bool has_static_literal(TokenType type) {
     return type > tt_end_no_static_literal;
 }
 
+bool is_keyword(TokenType type) {
+    return tt_begin_keyword < type && type < tt_end_keyword;
+}
+
 str get_token_literal(Token token) {
     if (has_static_literal(token.type)) {
         return token_type_strings[token.type];
@@ -126,17 +134,19 @@ TokenLookupResult lookup_keyword(str s) {
         return result;
     }
 
-    for (int token_type = tt_begin_keyword + 1; token_type < tt_end_keyword; token_type++) {
-        str keyword_str = token_type_strings[token_type];
-        bool found      = are_strs_equal(s, keyword_str);
-        if (found) {
-            result.ok   = true;
-            result.type = token_type;
-            return result;
-        }
+    result_u64 res = get_map_str_u64(lookup_token_map, s);
+    if (!res.ok) {
+        result.ok = false;
+        return result;
     }
 
-    result.ok = false;
+    if (!is_keyword(res.val)) {
+        result.ok = false;
+        return result;
+    }
+
+    result.ok   = true;
+    result.type = res.val;
     return result;
 }
 
@@ -152,26 +162,34 @@ bool are_tokens_equal(Token t1, Token t2) {
     return are_strs_equal(t1.literal, t2.literal);
 }
 
-map_str_u64 create_token_lookup_map() {
-    map_str_u64 m = new_map_str_u64(lookup_token_map_cap);
+void init_token_lookup_map() {
+    lookup_token_map = new_map_str_u64(lookup_token_map_cap);
     for (u64 type = tt_begin_no_static_literal + 1; type < tt_end_no_static_literal; type++) {
-        put_map_str_u64(&m, token_type_strings[type], type);
+        put_map_str_u64(&lookup_token_map, token_type_strings[type], type);
     }
     for (u64 type = tt_begin_operator + 1; type < tt_end_operator; type++) {
-        put_map_str_u64(&m, token_type_strings[type], type);
+        put_map_str_u64(&lookup_token_map, token_type_strings[type], type);
     }
     for (u64 type = tt_begin_keyword + 1; type < tt_end_keyword; type++) {
-        put_map_str_u64(&m, token_type_strings[type], type);
+        put_map_str_u64(&lookup_token_map, token_type_strings[type], type);
     }
-    put_map_str_u64(&m, token_type_strings[tt_Terminator], tt_Terminator);
-    put_map_str_u64(&m, token_type_strings[tt_EOF], tt_EOF);
-    return m;
+    put_map_str_u64(&lookup_token_map, token_type_strings[tt_Terminator], tt_Terminator);
+    put_map_str_u64(&lookup_token_map, token_type_strings[tt_EOF], tt_EOF);
+}
+
+void init_keyword_length_vars() {
+    for (u64 type = tt_begin_keyword + 1; type < tt_end_keyword; type++) {
+        u64 len = token_type_strings[type].len;
+        if (min_keyword_length > len) {
+            min_keyword_length = len;
+        }
+        if (max_keyword_length < len) {
+            max_keyword_length = len;
+        }
+    }
 }
 
 TokenLookupResult lookup_token(str s) {
-    if (lookup_token_map.buck == nil) {
-        lookup_token_map = create_token_lookup_map();
-    }
     TokenLookupResult lookup_res;
     result_u64 res  = get_map_str_u64(lookup_token_map, s);
     lookup_res.ok   = res.ok;
@@ -242,6 +260,10 @@ TokenParseResult parse_token_from_str(str s) {
     return res;
 }
 
+void init_token_module() {
+    init_keyword_length_vars();
+    init_token_lookup_map();
+}
 
 void print_token(Token token) {
     str type_str   = token_type_strings[token.type];
@@ -251,10 +273,12 @@ void print_token(Token token) {
     print_str(line_str);
     fwrite(":", 1, 1, stdout);
     print_str(column_str);
-    fwrite("  ", 1, 2, stdout);
+    u64 spaces = (u64)position_format_width - 1 - line_str.len - column_str.len;
+    fwrite(format_space_bytes, 1, spaces, stdout);
     print_str(type_str);
     if (!has_static_literal(token.type)) {
-        fwrite("  ", 1, 2, stdout);
+        spaces = (u64)token_type_format_width - type_str.len;
+        fwrite(format_space_bytes, 1, spaces, stdout);
         print_str(token.literal);
     }
     println();

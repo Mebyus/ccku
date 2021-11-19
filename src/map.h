@@ -17,8 +17,8 @@ struct result_u64 {
 };
 
 struct bucket_u64 {
-    u64 val;
     bucket_u64 *next;
+    u64 val;
     str key;
 };
 

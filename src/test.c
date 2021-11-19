@@ -70,6 +70,8 @@ int main(int argc, char **argv) {
         fatal(1, "not enough arguments");
     }
 
+    init_token_module();
+
     char *path                   = argv[1];
     SourceReadResult read_result = read_source_from_file(path);
     if (read_result.erc != 0) {

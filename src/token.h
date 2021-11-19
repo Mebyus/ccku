@@ -147,6 +147,7 @@ struct TokenParseResult {
     Token token;
 };
 
+void init_token_module();
 Token create_token(TokenType type, Position pos);
 Token create_token_with_literal(TokenType type, Position pos, str literal);
 TokenLookupResult lookup_keyword(str s);

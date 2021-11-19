@@ -35,6 +35,8 @@ int main(int argc, char **argv) {
         fatal(1, "not enough arguments");
     }
 
+    init_token_module();
+
     str cmd_str = take_str_from_cstr(argv[1]);
     char *path  = argv[2];
 
