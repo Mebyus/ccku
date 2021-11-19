@@ -10,7 +10,7 @@ const u32 lookup_token_map_cap = 1 << 8;
 
 map_str_u64 lookup_token_map = empty_map;
 
-str token_type_str[] = {
+str token_type_strings[] = {
     // Non static or empty literals
     [tt_Illegal]            = STR("ILLEGAL"),
     [tt_Comment]            = STR("COMMENT"),
@@ -97,7 +97,7 @@ bool has_static_literal(TokenType type) {
 
 str get_token_literal(Token token) {
     if (has_static_literal(token.type)) {
-        return token_type_str[token.type];
+        return token_type_strings[token.type];
     }
     return token.literal;
 }
@@ -127,7 +127,7 @@ TokenLookupResult lookup_keyword(str s) {
     }
 
     for (int token_type = tt_begin_keyword + 1; token_type < tt_end_keyword; token_type++) {
-        str keyword_str = token_type_str[token_type];
+        str keyword_str = token_type_strings[token_type];
         bool found      = are_strs_equal(s, keyword_str);
         if (found) {
             result.ok   = true;
@@ -155,16 +155,16 @@ bool are_tokens_equal(Token t1, Token t2) {
 map_str_u64 create_token_lookup_map() {
     map_str_u64 m = new_map_str_u64(lookup_token_map_cap);
     for (u64 type = tt_begin_no_static_literal + 1; type < tt_end_no_static_literal; type++) {
-        put_map_str_u64(&m, token_type_str[type], type);
+        put_map_str_u64(&m, token_type_strings[type], type);
     }
     for (u64 type = tt_begin_operator + 1; type < tt_end_operator; type++) {
-        put_map_str_u64(&m, token_type_str[type], type);
+        put_map_str_u64(&m, token_type_strings[type], type);
     }
     for (u64 type = tt_begin_keyword + 1; type < tt_end_keyword; type++) {
-        put_map_str_u64(&m, token_type_str[type], type);
+        put_map_str_u64(&m, token_type_strings[type], type);
     }
-    put_map_str_u64(&m, token_type_str[tt_Terminator], tt_Terminator);
-    put_map_str_u64(&m, token_type_str[tt_EOF], tt_EOF);
+    put_map_str_u64(&m, token_type_strings[tt_Terminator], tt_Terminator);
+    put_map_str_u64(&m, token_type_strings[tt_EOF], tt_EOF);
     printf("map cap: %d\n", m.cap);
     printf("map len: %d\n", m.len);
     printf("map col: %d\n", m.col);
@@ -184,13 +184,69 @@ TokenLookupResult lookup_token(str s) {
 
 TokenParseResult parse_token_from_str(str s) {
     TokenParseResult res;
-    u64 i = index_byte_in_str_from(s, ':', 0);
-    if (i >= s.len) {
+
+    u64 start = 0;
+    u64 end   = index_byte_in_str_from(s, ':', start);
+    if (end >= s.len - 2) {
         res.ok = false;
         return res;
     }
-    // str line_str = borrow_str_slice(s, 0, i);
-    res.token = (Token){.type = tt_Illegal};
+    str line_str                            = borrow_str_slice(s, start, end);
+    U32ParseResult line_number_parse_result = parse_u32_from_decimal(line_str);
+    if (!line_number_parse_result.ok) {
+        res.ok = false;
+        return res;
+    }
+    u32 line = line_number_parse_result.num;
+
+    start = end + 1;
+    end   = index_byte_in_str_from(s, ' ', start);
+    if (end >= s.len - 2) {
+        res.ok = false;
+        return res;
+    }
+    str column_str                            = borrow_str_slice(s, start, end);
+    U32ParseResult column_number_parse_result = parse_u32_from_decimal(column_str);
+    if (!column_number_parse_result.ok) {
+        res.ok = false;
+        return res;
+    }
+    u32 column = column_number_parse_result.num;
+
+    start                                 = index_other_byte_in_str_from(s, ' ', end);
+    end                                   = index_byte_in_str_from(s, ' ', start);
+    str token_type_str                    = borrow_str_slice(s, start, end);
+    TokenLookupResult token_lookup_result = lookup_token(token_type_str);
+    if (!token_lookup_result.ok) {
+        res.ok = false;
+        return res;
+    }
+    TokenType token_type = token_lookup_result.type;
+
+    if (!has_static_literal(token_type)) {
+        if (end >= s.len) {
+            res.ok    = true;
+            res.token = (Token){.type = token_type, .pos = {.line = line, .column = column}};
+        } else {
+            res.ok = false;
+        }
+        return res;
+    }
+
+    start = index_other_byte_in_str_from(s, ' ', end);
+    if (start >= s.len) {
+        res.ok = false;
+        return res;
+    }
+    end = index_byte_in_str_from(s, ' ', start);
+    if (end < s.len) {
+        res.ok = false;
+        return res;
+    }
+    str token_literal = borrow_str_slice_to_end(s, start);
+
+    res.ok    = true;
+    res.token = (Token){.type = token_type, .pos = {.line = line, .column = column}, .literal = token_literal};
     return res;
 }
 

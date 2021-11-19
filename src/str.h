@@ -7,6 +7,7 @@
     { .bytes = (byte *)s, .len = sizeof(s) - 1, .is_owner = false }
 
 typedef struct str str;
+typedef struct U32ParseResult U32ParseResult;
 typedef struct U64ParseResult U64ParseResult;
 
 struct str {
@@ -18,6 +19,11 @@ struct str {
 struct U64ParseResult {
     bool ok;
     u64 num;
+};
+
+struct U32ParseResult {
+    bool ok;
+    u32 num;
 };
 
 extern const str empty_str;
@@ -40,10 +46,11 @@ str format_u32_as_decimal(u32 n);
 str format_u64_as_decimal(u64 n);
 str format_i32_as_decimal(i32 n);
 str format_i64_as_decimal(i64 n);
-u64 parse_uint64_from_binary_no_checks(str s);
-u64 parse_uint64_from_octal_no_checks(str s);
-u64 parse_uint64_from_hexadecimal_no_checks(str s);
-U64ParseResult parse_uint64_from_decimal(str s);
+u64 parse_u64_from_binary_no_checks(str s);
+u64 parse_u64_from_octal_no_checks(str s);
+u64 parse_u64_from_hexadecimal_no_checks(str s);
+U32ParseResult parse_u32_from_decimal(str s);
+U64ParseResult parse_u64_from_decimal(str s);
 bool is_empty_str(str s);
 bool are_strs_equal(str s1, str s2);
 bool has_prefix_str(str s, str prefix);

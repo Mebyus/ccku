@@ -244,7 +244,29 @@ u64 parse_u64_from_hexadecimal_no_checks(str s) {
     return num;
 }
 
-U64ParseResult parse_uint64_from_decimal(str s) {
+U32ParseResult parse_u32_from_decimal(str s) {
+    U32ParseResult res;
+    if (s.len == 0 || s.len > max_u32_decimal_length) {
+        res.ok = false;
+        return res;
+    }
+    u32 num = 0;
+    for (u64 i = 0; i < s.len; i++) {
+        num *= 10;
+        byte b = s.bytes[i];
+        if (b < '0' || b > '9') {
+            res.ok = false;
+            return res;
+        }
+        u8 digit = (u8)(b - '0');
+        num += digit;
+    }
+    res.ok  = true;
+    res.num = num;
+    return res;
+}
+
+U64ParseResult parse_u64_from_decimal(str s) {
     U64ParseResult res;
     if (s.len == 0 || s.len > max_u64_decimal_length) {
         res.ok = false;
@@ -320,8 +342,8 @@ u64 index_other_byte_in_str(str s, byte b) {
 }
 
 u64 index_other_byte_in_str_from(str s, byte b, u64 pos) {
-    u64 i = pos;
-    for (; i < s.len && s.bytes[i] == b; i++) {
+    u64 i;
+    for (i = pos; i < s.len && s.bytes[i] == b; i++) {
     }
     return i;
 }
@@ -331,8 +353,8 @@ u64 index_byte_in_str(str s, byte b) {
 }
 
 u64 index_byte_in_str_from(str s, byte b, u64 pos) {
-    u64 i = pos;
-    for (; i < s.len && s.bytes[i] != b; i++) {
+    u64 i;
+    for (i = pos; i < s.len && s.bytes[i] != b; i++) {
     }
     return i;
 }

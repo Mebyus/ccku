@@ -54,7 +54,7 @@ int main(int argc, char **argv) {
     str s = STR("return");
     str n = STR("123");
     lookup_token(s);
-    U64ParseResult res = parse_uint64_from_decimal(n);
+    U64ParseResult res = parse_u64_from_decimal(n);
     printf("%d %ld %ld\n", res.ok, res.num, sizeof(U64ParseResult));
     if (argc < 2) {
         fatal(1, "not enough arguments");
