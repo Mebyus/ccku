@@ -48,7 +48,7 @@ test: ${TEST_PATH}
 ${TEST_PATH}: ${TARGET_OBJ_DIR}/test.o ${TARGET_OBJ_DIR}/source.o ${TARGET_OBJ_DIR}/scanner.o \
 ${TARGET_OBJ_DIR}/token.o ${TARGET_OBJ_DIR}/str.o ${TARGET_OBJ_DIR}/slice.o ${TARGET_OBJ_DIR}/byte_reader.o \
 ${TARGET_OBJ_DIR}/position.o ${TARGET_OBJ_DIR}/charset.o ${TARGET_OBJ_DIR}/fatal.o \
-${TARGET_OBJ_DIR}/split_test_scanner.o ${TARGET_OBJ_DIR}/map.o
+${TARGET_OBJ_DIR}/split_test_scanner.o ${TARGET_OBJ_DIR}/map.o ${TARGET_OBJ_DIR}/strop.o
 	${CC} -o $@ $^
 
 ${TARGET_OBJ_DIR}/cmd.o: ${SRC_DIR}/cmd.c
@@ -110,6 +110,10 @@ ${TARGET_OBJ_DIR}/timer.o: ${SRC_DIR}/timer.c
 ${TARGET_OBJ_DIR}/map.o: ${SRC_DIR}/map.c
 	${CC} ${CPPFLAGS} ${DEP_DIR}/map.d ${CFLAGS} -o $@ -c $<
 -include ${DEP_DIR}/map.d
+
+${TARGET_OBJ_DIR}/strop.o: ${SRC_DIR}/strop.c
+	${CC} ${CPPFLAGS} ${DEP_DIR}/strop.d ${CFLAGS} -o $@ -c $<
+-include ${DEP_DIR}/strop.d
 
 ${TARGET_OBJ_DIR}/split_test_scanner.o: ${SRC_DIR}/split_test_scanner.c
 	${CC} ${CPPFLAGS} ${DEP_DIR}/split_test_scanner.d ${CFLAGS} -o $@ -c $<

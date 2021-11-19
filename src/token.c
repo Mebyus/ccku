@@ -165,9 +165,6 @@ map_str_u64 create_token_lookup_map() {
     }
     put_map_str_u64(&m, token_type_strings[tt_Terminator], tt_Terminator);
     put_map_str_u64(&m, token_type_strings[tt_EOF], tt_EOF);
-    printf("map cap: %d\n", m.cap);
-    printf("map len: %d\n", m.len);
-    printf("map col: %d\n", m.col);
     return m;
 }
 
@@ -223,7 +220,7 @@ TokenParseResult parse_token_from_str(str s) {
     }
     TokenType token_type = token_lookup_result.type;
 
-    if (!has_static_literal(token_type)) {
+    if (has_static_literal(token_type)) {
         if (end >= s.len) {
             res.ok    = true;
             res.token = (Token){.type = token_type, .pos = {.line = line, .column = column}};
@@ -238,11 +235,6 @@ TokenParseResult parse_token_from_str(str s) {
         res.ok = false;
         return res;
     }
-    end = index_byte_in_str_from(s, ' ', start);
-    if (end < s.len) {
-        res.ok = false;
-        return res;
-    }
     str token_literal = borrow_str_slice_to_end(s, start);
 
     res.ok    = true;
@@ -252,8 +244,7 @@ TokenParseResult parse_token_from_str(str s) {
 
 
 void print_token(Token token) {
-    str literal    = get_token_literal(token);
-    str type_str   = format_u64_as_decimal(token.type);
+    str type_str   = token_type_strings[token.type];
     str line_str   = format_u64_as_decimal(token.pos.line);
     str column_str = format_u64_as_decimal(token.pos.column);
 
@@ -262,8 +253,11 @@ void print_token(Token token) {
     print_str(column_str);
     fwrite("  ", 1, 2, stdout);
     print_str(type_str);
-    fwrite("  ", 1, 2, stdout);
-    println_str(literal);
+    if (!has_static_literal(token.type)) {
+        fwrite("  ", 1, 2, stdout);
+        print_str(token.literal);
+    }
+    println();
 
     free_str(type_str);
     free_str(line_str);

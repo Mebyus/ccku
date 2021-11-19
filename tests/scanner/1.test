@@ -69,6 +69,6 @@ print("Hello, world!")
 ## program:
 325.290
 ## tokens:
-1:1     DECINT      325.290
+1:1     DECFLT      325.290
 1:8     EOF
 ## end
