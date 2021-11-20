@@ -2,11 +2,31 @@
 
 // Language syntax in Backus-Naur extended form
 //
-// <SourceText> = <ModuleClause>, [<ImportClause>], { <TopLevelDeclaration> }, <EOF>
+// <SourceText> = <ModuleClause> [ <ImportClause> ] { <TopLevelDeclaration> } <EOF>
 //
-// <ModuleClause> = "module", <Identifier>, <TERM>
+// <ModuleClause> = "module" <Identifier> <TERM>
 //
-// <TopLevelDeclaration> = <ConstDeclaration> | <TypeDeclaration> | <VarDeclaration> | <FunctionDeclaration>
+// <TopLevelDeclaration> = <ConstDeclaration> | <TypeDeclaration> | <VarDeclaration> | <FunctionDeclaration> | <FunctionDefinition>
+//
+// <FunctionDeclaration> = "fn" <FunctionName> <FunctionSignature>
+//
+// <FunctionDefinition> = <FunctionDeclaration> <FunctionBody>
+//
+// <FunctionSignature> = <FunctionParameters> [ "=>" <FunctionResult> ]
+//
+// <FunctionResult> = <FunctionParameters> | <TypeIdentifier>
+//
+// <FunctionParameters> = "(" [ <ParameterList> [ "," ] ] ")"
+//
+// <ParameterList>  = <ParameterDeclaration> { "," <ParameterDeclaration> }
+//
+// <ParameterDeclaration>  = [ <IdentifierList> ] [ "..." ] <TypeIdentifier>
+//
+// <IdentifierList> = <Identifier> { "," <Identifier> }
+//
+// <FunctionBody> = <BlockStatement>
+//
+// <FunctionName> = <Identifier>
 //
 // <ConstDeclaration> = "const", <ConstSpec>
 //
@@ -21,7 +41,8 @@
 // <StatementList> = { <Statement> };
 //
 // <Statement> = <BlockStatement> | <AssignStatement> | <DefineStatement> | <IfStatement> |
-//               <DeferStatement> | <ExpressionStatement> | <ReturnStatement> | <MatchStatement>;
+//               <DeferStatement> | <ExpressionStatement> | <ReturnStatement> | <MatchStatement> |
+//               <LoopStatement>
 //
 // <DeferStatement> = "defer", <DeferClause>;
 //

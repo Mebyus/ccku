@@ -1,0 +1,17 @@
+// Program to calculate n-th fibonacci number via dynamic programming
+
+fn fib(n u16) => u64 {
+    if n == 0 {
+        return 0
+    }
+    var a, b u64 = 0, 1
+    loop n - 1 {
+        a, b = b, a + b
+    }
+    return b
+}
+
+fn main() {
+    n := u64(12)
+    println("{} fibonacci number is {}", n, fib(n))
+}
