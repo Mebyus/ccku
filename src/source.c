@@ -149,6 +149,7 @@ SourceText new_source_from_str(str s) {
 }
 
 void free_source(SourceText source) {
-    free_str(source.text);
+    free_str(source.filename);
     free_str(source.filepath);
+    free_str(source.text);
 }

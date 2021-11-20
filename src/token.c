@@ -3,15 +3,15 @@
 #include "map.h"
 #include "token.h"
 
-const u8 position_format_width   = 13;
-const u8 token_type_format_width = 15;
+const u8 position_format_width   = 12;
+const u8 token_type_format_width = 12;
 
 const u32 lookup_token_map_cap = 1 << 8;
 const byte *format_space_bytes = (byte *)"                    ";
 
 // These variables should be initialized through init_token_module() call
 map_str_u64 lookup_token_map = empty_map;
-u64 min_keyword_length       = (u64)~0;
+u64 min_keyword_length       = UINT64_MAX;
 u64 max_keyword_length       = 0;
 
 str token_type_strings[] = {
