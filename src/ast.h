@@ -12,6 +12,11 @@ typedef struct Statement Statement;
 typedef struct DefineStatement DefineStatement;
 typedef struct Expression Expression;
 typedef struct CallExpression CallExpression;
+typedef struct FunctionDeclaration FunctionDeclaration;
+typedef struct FunctionDefinition FunctionDefinition;
+typedef struct FunctionResult FunctionResult;
+typedef struct FunctionParameters FunctionParameters;
+typedef struct BlockStatement BlockStatement;
 typedef struct CallArgument CallArgument;
 typedef struct Identifier Identifier;
 typedef struct Integer Integer;
@@ -43,6 +48,23 @@ enum ExpressionType {
     et_StringLiteral,
 };
 
+struct FunctionParameters {};
+
+struct FunctionResult {};
+
+struct FunctionDeclaration {
+    Identifier name;
+    FunctionParameters parameters;
+    FunctionResult result;
+};
+
+struct BlockStatement {};
+
+struct FunctionDefinition {
+    FunctionDeclaration declaration;
+    BlockStatement body;
+};
+
 struct Statement {
     StatementType type;
     void *ptr;
@@ -58,7 +80,7 @@ struct Expression {
 };
 
 struct Identifier {
-    str name;
+    Token token;
 };
 
 struct Integer {

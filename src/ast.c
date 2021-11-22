@@ -6,7 +6,8 @@
 //
 // <ModuleClause> = "module" <Identifier> <TERM>
 //
-// <TopLevelDeclaration> = <ConstDeclaration> | <TypeDeclaration> | <VarDeclaration> | <FunctionDeclaration> | <FunctionDefinition>
+// <TopLevelDeclaration> = <ConstDeclaration> | <TypeDeclaration> | <VarDeclaration> | <FunctionDeclaration> |
+//                         <FunctionDefinition>
 //
 // <FunctionDeclaration> = "fn" <FunctionName> <FunctionSignature>
 //
@@ -113,7 +114,7 @@ Expression init_identifier_expression(Token token) {
     if (ident == nil) {
         fatal(1, "not enough memory for new identifier expression");
     }
-    ident->name = take_str_from_str(&token.literal);
+    ident->token = token;
 
     Expression expr = {
         .type = et_Identifier,
