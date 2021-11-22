@@ -37,6 +37,8 @@ str token_type_strings[] = {
     [tt_NotEqual]           = STR("!="),
     [tt_LessOrEqual]        = STR("<="),
     [tt_GreaterOrEqual]     = STR(">="),
+    [tt_LeftArrow]          = STR("<-"),
+    [tt_RightArrow]         = STR("=>"),
     [tt_Increment]          = STR("++"),
     [tt_Decrement]          = STR("--"),
     [tt_Define]             = STR(":="),

@@ -52,6 +52,10 @@ struct FunctionParameters {};
 
 struct FunctionResult {};
 
+struct Identifier {
+    Token token;
+};
+
 struct FunctionDeclaration {
     Identifier name;
     FunctionParameters parameters;
@@ -77,10 +81,6 @@ struct DefineStatement {
 struct Expression {
     ExpressionType type;
     void *ptr;
-};
-
-struct Identifier {
-    Token token;
 };
 
 struct Integer {

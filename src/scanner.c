@@ -474,6 +474,10 @@ Token scan_equal_sign_start(Scanner *s) {
         token = create_token_at_scanner_position(s, tt_Equal);
         advance_scanner(s);
         advance_scanner(s);
+    } else if (s->next_code == '>') {
+        token = create_token_at_scanner_position(s, tt_RightArrow);
+        advance_scanner(s);
+        advance_scanner(s);
     } else {
         token = create_token_at_scanner_position(s, tt_Assign);
         advance_scanner(s);
@@ -487,6 +491,10 @@ Token scan_less_start(Scanner *s) {
 
     if (s->next_code == '=') {
         token = create_token_at_scanner_position(s, tt_LessOrEqual);
+        advance_scanner(s);
+        advance_scanner(s);
+    } else if (s->next_code == '-') {
+        token = create_token_at_scanner_position(s, tt_LeftArrow);
         advance_scanner(s);
         advance_scanner(s);
     } else {

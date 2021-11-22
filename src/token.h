@@ -70,6 +70,7 @@ enum TokenType {
     tt_LogicalAnd, // &&
     tt_LogicalOr,  // ||
     tt_LeftArrow,  // <-
+    tt_RightArrow, // =>
     tt_Increment,  // ++
     tt_Decrement,  // --
 
