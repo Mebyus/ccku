@@ -60,6 +60,7 @@ u64 index_byte_in_str(str s, byte b);
 u64 index_byte_in_str_from(str s, byte b, u64 pos);
 u64 index_other_byte_in_str(str s, byte b);
 u64 index_other_byte_in_str_from(str s, byte b, u64 pos);
+u64 index_last_byte_in_str(str s, byte b);
 char *str_to_cstr(str s);
 void print_str(str s);
 void println_str(str s);

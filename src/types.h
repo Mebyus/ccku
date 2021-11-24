@@ -1,5 +1,5 @@
-#ifndef KU_BYTE_H
-#define KU_BYTE_H
+#ifndef KU_TYPES_H
+#define KU_TYPES_H
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -23,4 +23,4 @@ typedef double f64;
 typedef u8 byte;
 typedef u32 rune;
 
-#endif // KU_BYTE_H
+#endif // KU_TYPES_H

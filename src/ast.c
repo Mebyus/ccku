@@ -15,13 +15,13 @@
 //
 // <FunctionSignature> = <FunctionParameters> [ "=>" <FunctionResult> ]
 //
-// <FunctionResult> = <FunctionParameters> | <TypeIdentifier>
+// <FunctionResult> = <FunctionParameters> | <TypeSpecifier>
 //
 // <FunctionParameters> = "(" [ <ParameterList> [ "," ] ] ")"
 //
 // <ParameterList>  = <ParameterDeclaration> { "," <ParameterDeclaration> }
 //
-// <ParameterDeclaration>  = [ <IdentifierList> ] [ "..." ] <TypeIdentifier>
+// <ParameterDeclaration>  = [ <IdentifierList> ] [ "..." ] <TypeSpecifier>
 //
 // <IdentifierList> = <Identifier> { "," <Identifier> }
 //

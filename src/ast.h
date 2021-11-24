@@ -6,6 +6,7 @@
 #include "token.h"
 #include "types.h"
 
+typedef enum FunctionResultType FunctionResultType;
 typedef enum StatementType StatementType;
 typedef enum ExpressionType ExpressionType;
 typedef struct Statement Statement;
@@ -14,17 +15,29 @@ typedef struct Expression Expression;
 typedef struct CallExpression CallExpression;
 typedef struct FunctionDeclaration FunctionDeclaration;
 typedef struct FunctionDefinition FunctionDefinition;
+typedef struct SimpleResult SimpleResult;
+typedef struct TupleResult TupleResult;
 typedef struct FunctionResult FunctionResult;
 typedef struct FunctionParameters FunctionParameters;
+typedef struct ParameterDeclaration ParameterDeclaration;
+typedef struct TypeSpecifier TypeSpecifier;
 typedef struct BlockStatement BlockStatement;
 typedef struct CallArgument CallArgument;
 typedef struct Identifier Identifier;
 typedef struct Integer Integer;
 typedef struct String String;
 
+TYPEDEF_SLICE(Identifier)
+TYPEDEF_SLICE(ParameterDeclaration)
 TYPEDEF_SLICE(Statement)
 TYPEDEF_SLICE(Expression)
 TYPEDEF_SLICE(CallArgument)
+
+enum FunctionResultType {
+    frt_Void,
+    frt_Simple,
+    frt_Tuple,
+};
 
 enum StatementType {
     st_Empty,
@@ -48,9 +61,29 @@ enum ExpressionType {
     et_StringLiteral,
 };
 
-struct FunctionParameters {};
+struct TypeSpecifier {};
 
-struct FunctionResult {};
+struct ParameterDeclaration {
+    TypeSpecifier type_specifier;
+    slice_of_Identifiers names;
+};
+
+struct FunctionParameters {
+    slice_of_ParameterDeclarations parameter_declarations;
+};
+
+struct SimpleResult {
+    TypeSpecifier type_specifier;
+};
+
+struct TupleResult {
+    slice_of_ParameterDeclarations parameter_declarations;
+};
+
+struct FunctionResult {
+    FunctionResultType type;
+    void *ptr;
+};
 
 struct Identifier {
     Token token;
@@ -62,7 +95,9 @@ struct FunctionDeclaration {
     FunctionResult result;
 };
 
-struct BlockStatement {};
+struct BlockStatement {
+    slice_of_Statements statements;
+};
 
 struct FunctionDefinition {
     FunctionDeclaration declaration;

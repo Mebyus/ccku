@@ -376,6 +376,19 @@ u64 index_byte_in_str_from(str s, byte b, u64 pos) {
     return i;
 }
 
+u64 index_last_byte_in_str(str s, byte b) {
+    if (s.len == 0) {
+        return 0;
+    }
+    u64 i;
+    for (i = s.len-1; i > 0 && s.bytes[i] != b; i--) {
+    }
+    if (s.bytes[i] != b) {
+        return s.len;
+    }
+    return i;
+}
+
 void print_str(str s) {
     if (s.len == 0) {
         return;
