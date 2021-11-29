@@ -11,20 +11,29 @@ TEST_NAME = test
 RELEASE_DIR = release
 DEBUG_DIR = debug
 
+# C compiler executable
 CC = cc
+
 CSTANDARD = 11
 OPTIMIZATION = 2
+
+# C preprocessor flags
 CPPFLAGS = -MMD -MP -MF
+
+# C compiler warnings
 WARNINGS = -Wall -Wextra -Wconversion -Wunreachable-code -Wshadow -Wundef -Wfloat-equal -Wformat -Wpointer-arith -Winit-self
+
+# C compiler code generation conventions flags
+GENFLAGS = -fwrapv
 
 ifeq (${BUILD}, debug)
 	TARGET_BIN_DIR = ${BIN_DIR}/${DEBUG_DIR}
 	TARGET_OBJ_DIR = ${OBJ_DIR}/${DEBUG_DIR}
-	CFLAGS = ${WARNINGS} -Werror -std=c${CSTANDARD} -g
+	CFLAGS = ${GENFLAGS} ${WARNINGS} -Werror -std=c${CSTANDARD} -g
 else
 	TARGET_BIN_DIR = ${BIN_DIR}/${RELEASE_DIR}
 	TARGET_OBJ_DIR = ${OBJ_DIR}/${RELEASE_DIR}
-	CFLAGS = ${WARNINGS} -Werror -std=c${CSTANDARD} -O${OPTIMIZATION}
+	CFLAGS = ${GENFLAGS} ${WARNINGS} -Werror -std=c${CSTANDARD} -O${OPTIMIZATION}
 endif
 
 $(shell mkdir -p ${TARGET_BIN_DIR})
