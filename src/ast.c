@@ -4,7 +4,9 @@
 //
 // <SourceText> = <ModuleClause> [ <ImportClause> ] { <TopLevelDeclaration> } <EOF>
 //
-// <ModuleClause> = "module" <Identifier> <TERM>
+// <ModuleClause> = "module" <ModuleName>
+//
+// <ModuleName> = <Identifier>
 //
 // <TopLevelDeclaration> = <ConstDeclaration> | <TypeDeclaration> | <VarDeclaration> | <FunctionDeclaration> |
 //                         <FunctionDefinition>
@@ -28,6 +30,33 @@
 // <FunctionBody> = <BlockStatement>
 //
 // <FunctionName> = <Identifier>
+//
+// <TypeSpecifier> = <TypeName> | <TypeLiteral>
+//
+// <TypeName> = <Identifier> | <QualifiedIdentifier>
+//
+// <QualifiedIdentifier> = <ModuleName> "." <Identifier>
+//
+// <TypeLiteral> = <ArrayTypeLiteral> | <PointerTypeLiteral> | <SliceTypeLiteral> | <MapTypeLiteral> |
+//                 <ChannelTypeLiteral>
+//
+// <ArrayTypeLiteral> = "[" <ArrayLengthSpecifier> "]" <ElementTypeSpecifier>
+//
+// <ArrayLengthSpecifier> = <Expression>
+//
+// <ElementTypeSpecifier> = <TypeSpecifier>
+//
+// <PointerTypeLiteral> = "*" <BaseTypeSpecifier>
+//
+// <BaseTypeSpecifier> = <TypeSpecifier>
+//
+// <SliceTypeLiteral> = "[" "]" <ElementTypeSpecifier>
+//
+// <MapTypeLiteral> = "[" <KeyTypeSpecifier> "]" "=>" <ValueTypeSpecifier>
+//
+// <KeyTypeSpecifier> = <TypeSpecifier>
+//
+// <ValueTypeSpecifier> = <TypeSpecifier>
 //
 // <ConstDeclaration> = "const", <ConstSpec>
 //
