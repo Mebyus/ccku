@@ -37,7 +37,8 @@ const str warn_str = STR("Test case: ");
 const str want_str = STR("Want: ");
 const str got_str  = STR("Got:  ");
 
-void run_test_cases(slice_of_ScannerTestCases test_cases) {
+u32 run_test_cases(slice_of_ScannerTestCases test_cases) {
+    u32 failed = 0;
     for (u32 i = 0; i < test_cases.len; i++) {
         ScannerTestCase test_case = test_cases.elem[i];
         Scanner scanner           = init_scanner_from_str(test_case.source_str);
@@ -46,6 +47,7 @@ void run_test_cases(slice_of_ScannerTestCases test_cases) {
             Token want_token = test_case.want_tokens.elem[j];
             Token got_token  = scan_token(s);
             if (!are_tokens_equal(want_token, got_token)) {
+                failed++;
                 println();
                 print_str(warn_str);
                 print_str(test_case.id);
@@ -60,10 +62,15 @@ void run_test_cases(slice_of_ScannerTestCases test_cases) {
             free_token(got_token);
         }
     }
+    return failed;
 }
 
-void run_test_suite(ScannerTestSuite suite) {
-    run_test_cases(suite.cases);
+int run_test_suite(ScannerTestSuite suite) {
+    u32 failed_test_cases = run_test_cases(suite.cases);
+    if (failed_test_cases > 0) {
+        return 1;
+    }
+    return 0;
 }
 
 void cleanup_test_cases(slice_of_ScannerTestCases test_cases) {
@@ -150,7 +157,8 @@ int main(int argc, char **argv) {
     }
 
     ScannerTestSuite test_suite = create_test_suite_from_source(read_result.source);
-    run_test_suite(test_suite);
+    int code                    = run_test_suite(test_suite);
     cleanup_test_suite(test_suite);
-    return 0;
+
+    exit(code);
 }
