@@ -6,6 +6,8 @@
 #define STR(s)                                                                                                         \
     { .origin = nil, .bytes = (byte *)s, .len = sizeof(s) - 1 }
 
+#define EMPTY_STR (str){.origin = nil, .bytes = nil, .len = 0}
+
 typedef struct str str;
 typedef struct U32ParseResult U32ParseResult;
 typedef struct U64ParseResult U64ParseResult;
