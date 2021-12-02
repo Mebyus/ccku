@@ -1,14 +1,21 @@
+#include <stdlib.h>
 #include <string.h>
 
+#include "fatal.h"
 #include "path.h"
 
 u64 clean_path_bytes_in_place(byte *bytes, u64 size) {
     u64 pos       = 0;
     int prev_code = -1;
     for (u64 i = 0; i < size; i++) {
-        byte b    = bytes[i];
+        byte b = bytes[i];
+        if (prev_code == b) {
+        } else {
+            pos++; // test
+        }
         prev_code = b;
     }
+    return pos;
 }
 
 str new_clean_path_from_bytes(const byte *bytes, u64 size) {
@@ -18,23 +25,23 @@ str new_clean_path_from_bytes(const byte *bytes, u64 size) {
         return new_str_from_byte(bytes[1]);
     }
 
-    byte *b = (byte *)malloc(size);
-    if (b == nil) {
+    byte *new_bytes = (byte *)malloc(size);
+    if (new_bytes == nil) {
         fatal(1, "not enough memory for new path");
     }
-    memcpy(b, bytes, size);
+    memcpy(new_bytes, bytes, size);
 
-    u64 len = clean_path_bytes_in_place(b, size);
+    u64 len = clean_path_bytes_in_place(new_bytes, size);
     str s   = {
-        .origin = b,
-        .bytes  = b,
+        .origin = new_bytes,
+        .bytes  = new_bytes,
         .len    = len,
     };
     return s;
 }
 
 str new_clean_path_from_cstr(const char *cstr) {
-    return new_clean_path_from_bytes(cstr, strlen(cstr));
+    return new_clean_path_from_bytes((byte *)cstr, strlen(cstr));
 }
 
 str new_clean_path_from_str(str s) {

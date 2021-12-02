@@ -33,7 +33,7 @@ const str tokens_control_line  = STR("## tokens:");
 const str end_control_line     = STR("## end");
 
 
-const str warn_str = STR("Test case: ");
+const str case_str = STR("Test case: ");
 const str want_str = STR("Want: ");
 const str got_str  = STR("Got:  ");
 
@@ -49,7 +49,7 @@ u32 run_test_cases(slice_of_ScannerTestCases test_cases) {
             if (!are_tokens_equal(want_token, got_token)) {
                 failed++;
                 println();
-                print_str(warn_str);
+                print_str(case_str);
                 print_str(test_case.id);
                 fwrite(" (", 1, 2, stdout);
                 print_str(test_case.label);

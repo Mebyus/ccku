@@ -6,7 +6,10 @@
 #define STR(s)                                                                                                         \
     { .origin = nil, .bytes = (byte *)s, .len = sizeof(s) - 1 }
 
-#define EMPTY_STR (str){.origin = nil, .bytes = nil, .len = 0}
+#define EMPTY_STR                                                                                                      \
+    (str) {                                                                                                            \
+        .origin = nil, .bytes = nil, .len = 0                                                                          \
+    }
 
 typedef struct str str;
 typedef struct U32ParseResult U32ParseResult;
@@ -31,14 +34,12 @@ struct U32ParseResult {
 extern const str empty_str;
 
 str new_str_from_cstr(char *s);
-str new_str_from_chars(char *buf, u64 size);
-str new_str_from_bytes(byte *bytes, u64 size);
+str new_str_from_bytes(const byte *bytes, u64 size);
 str new_str_from_byte(byte b);
 str new_str_from_str(str s);
 str new_str_slice(str s, u64 start, u64 end);
 str new_str_slice_to_end(str s, u64 start);
 str take_str_from_cstr(char *s);
-str take_str_from_chars(char *buf, u64 size);
 str take_str_from_bytes(byte *bytes, u64 size);
 str take_str_from_str(str *s);
 str borrow_str_from_bytes(const byte *bytes, u64 size);

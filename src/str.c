@@ -39,50 +39,27 @@ str borrow_str_from_bytes_no_check(const byte *bytes, u64 size) {
     return s;
 }
 
-str new_str_from_chars(char *buf, u64 size) {
-    if (size == 0) {
-        return empty_str;
-    } else if (size == 1) {
-        return new_str_from_byte((byte)buf[0]);
-    }
-
-    byte *bytes = (byte *)malloc(size);
-    if (bytes == nil) {
-        fatal(1, "not enough memory for new string");
-    }
-
-    memcpy(bytes, buf, size);
-
-    str s = {
-        .origin = bytes,
-        .bytes  = bytes,
-        .len    = size,
-    };
-    return s;
-}
-
 str new_str_from_cstr(char *cstr) {
-    u64 len = strlen(cstr);
-    return new_str_from_chars(cstr, len);
+    return new_str_from_bytes((byte *)cstr, strlen(cstr));
 }
 
-str new_str_from_bytes(byte *bytes, u64 size) {
+str new_str_from_bytes(const byte *bytes, u64 size) {
     if (size == 0) {
         return empty_str;
     } else if (size == 1) {
         return new_str_from_byte(bytes[0]);
     }
 
-    byte *b = (byte *)malloc(size);
-    if (b == nil) {
+    byte *new_bytes = (byte *)malloc(size);
+    if (new_bytes == nil) {
         fatal(1, "not enough memory for new string");
     }
 
-    memcpy(b, bytes, size);
+    memcpy(new_bytes, bytes, size);
 
     str s = {
-        .origin = b,
-        .bytes  = b,
+        .origin = new_bytes,
+        .bytes  = new_bytes,
         .len    = size,
     };
     return s;
@@ -100,15 +77,6 @@ str new_str_slice_to_end(str s, u64 start) {
     return new_str_slice(s, start, s.len);
 }
 
-str take_str_from_chars(char *buf, u64 size) {
-    str s = {
-        .origin = buf,
-        .bytes  = (byte *)buf,
-        .len    = size,
-    };
-    return s;
-}
-
 str take_str_from_bytes(byte *bytes, u64 size) {
     str s = {
         .origin = bytes,
@@ -119,7 +87,7 @@ str take_str_from_bytes(byte *bytes, u64 size) {
 }
 
 str take_str_from_cstr(char *cstr) {
-    return take_str_from_chars(cstr, strlen(cstr));
+    return take_str_from_bytes((byte *)cstr, strlen(cstr));
 }
 
 str take_str_from_str(str *s) {
@@ -381,7 +349,7 @@ u64 index_last_byte_in_str(str s, byte b) {
         return 0;
     }
     u64 i;
-    for (i = s.len-1; i > 0 && s.bytes[i] != b; i--) {
+    for (i = s.len - 1; i > 0 && s.bytes[i] != b; i--) {
     }
     if (s.bytes[i] != b) {
         return s.len;

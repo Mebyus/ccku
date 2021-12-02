@@ -7,6 +7,7 @@ DEP_DIR = d
 
 BIN_NAME = cckuc
 TEST_NAME = test
+PATH_TEST_NAME = path_test
 
 RELEASE_DIR = release
 DEBUG_DIR = debug
@@ -21,7 +22,8 @@ OPTIMIZATION = 2
 CPPFLAGS = -MMD -MP -MF
 
 # C compiler warnings
-WARNINGS = -Wall -Wextra -Wconversion -Wunreachable-code -Wshadow -Wundef -Wfloat-equal -Wformat -Wpointer-arith -Winit-self
+WARNINGS = -Wall -Wextra -Wconversion -Wunreachable-code -Wshadow -Wundef -Wfloat-equal -Wformat \
+-Wpointer-arith -Winit-self -Wduplicated-branches -Wduplicated-cond
 
 # C compiler code generation conventions flags
 GENFLAGS = -fwrapv
@@ -42,6 +44,7 @@ $(shell mkdir -p ${DEP_DIR})
 
 BIN_PATH = ${TARGET_BIN_DIR}/${BIN_NAME}
 TEST_PATH = ${TARGET_BIN_DIR}/${TEST_NAME}
+PATH_TEST_PATH = ${TARGET_BIN_DIR}/${PATH_TEST_NAME}
 
 
 ${BIN_PATH}: ${TARGET_OBJ_DIR}/cmd.o ${TARGET_OBJ_DIR}/source.o ${TARGET_OBJ_DIR}/scanner.o \
@@ -54,6 +57,14 @@ ${TARGET_OBJ_DIR}/charset.o ${TARGET_OBJ_DIR}/map.o
 test: ${TEST_PATH}
 	${TEST_PATH} tests/scanner/1.test
 
+.PHONY: path_test
+path_test: ${PATH_TEST_PATH}
+	${PATH_TEST_PATH}
+
+${PATH_TEST_PATH}: ${TARGET_OBJ_DIR}/str.o ${TARGET_OBJ_DIR}/charset.o ${TARGET_OBJ_DIR}/fatal.o \
+${TARGET_OBJ_DIR}/path_test.o ${TARGET_OBJ_DIR}/path.o
+	${CC} -o $@ $^
+
 ${TEST_PATH}: ${TARGET_OBJ_DIR}/test.o ${TARGET_OBJ_DIR}/source.o ${TARGET_OBJ_DIR}/scanner.o \
 ${TARGET_OBJ_DIR}/token.o ${TARGET_OBJ_DIR}/str.o ${TARGET_OBJ_DIR}/slice.o ${TARGET_OBJ_DIR}/byte_reader.o \
 ${TARGET_OBJ_DIR}/position.o ${TARGET_OBJ_DIR}/charset.o ${TARGET_OBJ_DIR}/fatal.o \
@@ -63,6 +74,10 @@ ${TARGET_OBJ_DIR}/split_test_scanner.o ${TARGET_OBJ_DIR}/map.o ${TARGET_OBJ_DIR}
 ${TARGET_OBJ_DIR}/cmd.o: ${SRC_DIR}/cmd.c
 	${CC} ${CPPFLAGS} ${DEP_DIR}/cmd.d ${CFLAGS} -o $@ -c $<
 -include ${DEP_DIR}/cmd.d
+
+${TARGET_OBJ_DIR}/path_test.o: ${SRC_DIR}/path_test.c
+	${CC} ${CPPFLAGS} ${DEP_DIR}/path_test.d ${CFLAGS} -o $@ -c $<
+-include ${DEP_DIR}/path_test.d
 
 ${TARGET_OBJ_DIR}/test.o: ${SRC_DIR}/test.c
 	${CC} ${CPPFLAGS} ${DEP_DIR}/test.d ${CFLAGS} -o $@ -c $<
@@ -107,6 +122,10 @@ ${TARGET_OBJ_DIR}/parser.o: ${SRC_DIR}/parser.c
 ${TARGET_OBJ_DIR}/fatal.o: ${SRC_DIR}/fatal.c
 	${CC} ${CPPFLAGS} ${DEP_DIR}/fatal.d ${CFLAGS} -o $@ -c $<
 -include ${DEP_DIR}/fatal.d
+
+${TARGET_OBJ_DIR}/path.o: ${SRC_DIR}/path.c
+	${CC} ${CPPFLAGS} ${DEP_DIR}/path.d ${CFLAGS} -o $@ -c $<
+-include ${DEP_DIR}/path.d
 
 ${TARGET_OBJ_DIR}/charset.o: ${SRC_DIR}/charset.c
 	${CC} ${CPPFLAGS} ${DEP_DIR}/charset.d ${CFLAGS} -o $@ -c $<
