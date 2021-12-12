@@ -1,5 +1,5 @@
-#ifndef KU_STATEMENT_H
-#define KU_STATEMENT_H
+#ifndef KU_AST_H
+#define KU_AST_H
 
 #include "slice.h"
 #include "str.h"
@@ -9,6 +9,8 @@
 typedef enum FunctionResultType FunctionResultType;
 typedef enum StatementType StatementType;
 typedef enum ExpressionType ExpressionType;
+typedef enum TypeSpecifierType TypeSpecifierType;
+typedef enum TypeLiteralType TypeLiteralType;
 typedef struct Statement Statement;
 typedef struct DefineStatement DefineStatement;
 typedef struct Expression Expression;
@@ -61,7 +63,52 @@ enum ExpressionType {
     et_StringLiteral,
 };
 
-struct TypeSpecifier {};
+enum TypeSpecifierType {
+    tst_Name,
+    tst_Literal,
+};
+
+enum TypeLiteralType {
+    tlt_Pointer,
+    tlt_Array,
+    tlt_Slice,
+    tlt_Map,
+    tlt_Set,
+    tlt_Channel,
+};
+
+struct TypeName {
+    Identifier module_name;
+    Identifier name;
+};
+
+struct ArrayTypeLiteral {
+    Expression length_specifier;
+    TypeSpecifier element_type;
+};
+
+struct SliceTypeLiteral {
+    TypeSpecifier element_type;
+};
+
+struct MapTypeLiteral {
+    TypeSpecifier key_type;
+    TypeSpecifier value_type;
+};
+
+struct SetTypeLiteral {
+    TypeSpecifier element_type;
+};
+
+struct TypeLiteral {
+    TypeLiteralType type;
+    void *ptr;
+};
+
+struct TypeSpecifier {
+    TypeSpecifierType type;
+    void *ptr;
+};
 
 struct ParameterDeclaration {
     TypeSpecifier type_specifier;
@@ -144,4 +191,4 @@ Expression init_integer_expression(Token token);
 Expression init_call_expression(Token name_token, slice_of_Expressions args);
 Expression init_string_expression(Token token);
 
-#endif // KU_STATEMENT_H
+#endif // KU_AST_H
