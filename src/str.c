@@ -39,7 +39,7 @@ str borrow_str_from_bytes_no_check(const byte *bytes, u64 size) {
     return s;
 }
 
-str new_str_from_cstr(char *cstr) {
+str new_str_from_cstr(const char *cstr) {
     return new_str_from_bytes((byte *)cstr, strlen(cstr));
 }
 

@@ -22,7 +22,7 @@ str new_clean_path_from_bytes(const byte *bytes, u64 size) {
     if (size == 0) {
         return new_str_from_byte('.');
     } else if (size == 1) {
-        return new_str_from_byte(bytes[1]);
+        return new_str_from_byte(bytes[0]);
     }
 
     byte *new_bytes = (byte *)malloc(size);

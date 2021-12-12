@@ -130,6 +130,8 @@ const PathTestCase test_cases[] = {
     },
 };
 
+const str pass_str  = STR("    path_test [ OK ]");
+const str fail_str  = STR("[ FAILED ]");
 const str case_str  = STR("Test case: ");
 const str input_str = STR("Input: ");
 const str want_str  = STR("Want:  ");
@@ -139,6 +141,7 @@ void print_failed_test_case(PathTestCase test_case, str got_path) {
     str id_str = format_u64_as_decimal(test_case.id);
 
     println();
+    println_str(fail_str);
     print_str(case_str);
     print_str(id_str);
     fwrite(" (", 1, 2, stdout);
@@ -152,6 +155,12 @@ void print_failed_test_case(PathTestCase test_case, str got_path) {
     println_str(got_path);
 
     free_str(id_str);
+}
+
+void print_test_passed_message() {
+    println();
+    println_str(pass_str);
+    println();
 }
 
 bool run_test_case(PathTestCase test_case) {
@@ -177,5 +186,6 @@ int main() {
         println();
         exit(1);
     }
+    print_test_passed_message();
     return 0;
 }

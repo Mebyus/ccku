@@ -33,7 +33,7 @@ struct U32ParseResult {
 
 extern const str empty_str;
 
-str new_str_from_cstr(char *s);
+str new_str_from_cstr(const char *s);
 str new_str_from_bytes(const byte *bytes, u64 size);
 str new_str_from_byte(byte b);
 str new_str_from_str(str s);
