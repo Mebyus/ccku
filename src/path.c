@@ -18,6 +18,15 @@ u64 clean_path_bytes_in_place(byte *bytes, u64 size) {
     return pos;
 }
 
+u64 clean_path_bytes_to_dest(const byte *bytes, byte *dest, u64 size) {
+    u64 pos = 0;
+    for (u64 i = 0; i < size; i++) {
+        dest[i] = bytes[i];
+        pos++;
+    }
+    return pos;
+}
+
 str new_clean_path_from_bytes(const byte *bytes, u64 size) {
     if (size == 0) {
         return new_str_from_byte('.');
@@ -29,9 +38,8 @@ str new_clean_path_from_bytes(const byte *bytes, u64 size) {
     if (new_bytes == nil) {
         fatal(1, "not enough memory for new path");
     }
-    memcpy(new_bytes, bytes, size);
 
-    u64 len = clean_path_bytes_in_place(new_bytes, size);
+    u64 len = clean_path_bytes_to_dest(bytes, new_bytes, size);
     str s   = {
         .origin = new_bytes,
         .bytes  = new_bytes,
