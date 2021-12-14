@@ -11,6 +11,7 @@ typedef enum StatementType StatementType;
 typedef enum ExpressionType ExpressionType;
 typedef enum TypeSpecifierType TypeSpecifierType;
 typedef enum TypeLiteralType TypeLiteralType;
+typedef struct StandaloneSourceText StandaloneSourceText;
 typedef struct Statement Statement;
 typedef struct DefineStatement DefineStatement;
 typedef struct Expression Expression;
@@ -34,6 +35,7 @@ TYPEDEF_SLICE(ParameterDeclaration)
 TYPEDEF_SLICE(Statement)
 TYPEDEF_SLICE(Expression)
 TYPEDEF_SLICE(CallArgument)
+TYPEDEF_SLICE(FunctionDefinition)
 
 enum FunctionResultType {
     frt_Void,
@@ -180,6 +182,11 @@ struct CallExpression {
 
 struct CallArgument {
     Expression expression;
+};
+
+struct StandaloneSourceText {
+    slice_of_FunctionDefinitions functions;
+    slice_of_Statements statements;
 };
 
 Statement init_empty_statement();
