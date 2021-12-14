@@ -9,6 +9,9 @@
 
 u32 get_new_cap(u32 cap);
 
+#define EMPTY_SLICE                                                                                                    \
+    { .is_owner = false, .elem = nil, .len = 0, .cap = 0 }
+
 #define SLICE(type, ...)                                                                                               \
     (slice_of_##type##s) {                                                                                             \
         .is_owner = false, .elem = (type *)(type[])__VA_ARGS__, .len = sizeof((type[])__VA_ARGS__) / sizeof(type),     \

@@ -101,6 +101,11 @@
 //
 // <ReturnStatement> = "return", [ <Expression> ], ";";
 
+const StandaloneSourceTree empty_standalone_source_text = {
+    .functions  = EMPTY_SLICE,
+    .statements = EMPTY_SLICE,
+};
+
 Statement init_empty_statement() {
     Statement stmt = {
         .type = st_Empty,
@@ -198,3 +203,6 @@ Expression init_call_expression(Token name_token, slice_of_Expressions args) {
 IMPLEMENT_SLICE(Statement)
 IMPLEMENT_SLICE(Expression)
 IMPLEMENT_SLICE(CallArgument)
+IMPLEMENT_SLICE(Identifier)
+IMPLEMENT_SLICE(ParameterDeclaration)
+IMPLEMENT_SLICE(FunctionDefinition)

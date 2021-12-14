@@ -11,7 +11,7 @@ typedef enum StatementType StatementType;
 typedef enum ExpressionType ExpressionType;
 typedef enum TypeSpecifierType TypeSpecifierType;
 typedef enum TypeLiteralType TypeLiteralType;
-typedef struct StandaloneSourceText StandaloneSourceText;
+typedef struct StandaloneSourceTree StandaloneSourceTree;
 typedef struct Statement Statement;
 typedef struct DefineStatement DefineStatement;
 typedef struct Expression Expression;
@@ -79,6 +79,20 @@ enum TypeLiteralType {
     tlt_Channel,
 };
 
+struct Identifier {
+    Token token;
+};
+
+struct Expression {
+    ExpressionType type;
+    void *ptr;
+};
+
+struct TypeSpecifier {
+    TypeSpecifierType type;
+    void *ptr;
+};
+
 struct TypeName {
     Identifier module_name;
     Identifier name;
@@ -107,11 +121,6 @@ struct TypeLiteral {
     void *ptr;
 };
 
-struct TypeSpecifier {
-    TypeSpecifierType type;
-    void *ptr;
-};
-
 struct ParameterDeclaration {
     TypeSpecifier type_specifier;
     slice_of_Identifiers names;
@@ -132,10 +141,6 @@ struct TupleResult {
 struct FunctionResult {
     FunctionResultType type;
     void *ptr;
-};
-
-struct Identifier {
-    Token token;
 };
 
 struct FunctionDeclaration {
@@ -162,11 +167,6 @@ struct DefineStatement {
     slice_of_Expressions left, right;
 };
 
-struct Expression {
-    ExpressionType type;
-    void *ptr;
-};
-
 struct Integer {
     Token token;
 };
@@ -184,10 +184,12 @@ struct CallArgument {
     Expression expression;
 };
 
-struct StandaloneSourceText {
+struct StandaloneSourceTree {
     slice_of_FunctionDefinitions functions;
     slice_of_Statements statements;
 };
+
+extern const StandaloneSourceTree empty_standalone_source_text;
 
 Statement init_empty_statement();
 Statement init_define_statement(slice_of_Expressions left, slice_of_Expressions right);

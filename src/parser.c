@@ -5,6 +5,8 @@
 #define ENABLE_DEBUG 1
 #include "debug.h"
 
+const u8 parser_buffer_size = 2;
+
 Token get_next_token(Parser *p) {
     Token token;
     if (p->prefetched) {
@@ -98,10 +100,6 @@ Statement parse_call_statement(Parser *p) {
 }
 
 Statement parse_statement(Parser *p) {
-    if (p->token.type == tt_Comment) {
-        skip_comments(p);
-    }
-
     switch (p->token.type) {
     case tt_Identifier:
         if (p->next_token.type == tt_Define) {
@@ -140,4 +138,48 @@ slice_of_Statements parse(Parser *p) {
         }
     }
     return s;
+}
+
+bool is_top_level_start(TokenType type) {
+    return type == tt_Function;
+}
+
+void parse_top_level(Parser *p) {}
+
+void init_parser_buffer(Parser *p) {
+    for (u8 i = 0; i < parser_buffer_size; i++) {
+        advance_parser(p);
+    }
+}
+
+StandaloneParseResult parse_standalone(Parser *p) {
+    StandaloneParseResult result = {
+        .ok = false,
+    };
+    result.tree = empty_standalone_source_text;
+
+    while (p->token.type != tt_EOF) {
+        if (p->token.type == tt_Comment) {
+            skip_comments(p);
+        } else if (is_toplevel_start(p->token.type)) {
+            parse_top_level(p);
+        } else {
+            Statement stmt = parse_statement(p);
+            if (stmt.type != st_Empty) {
+                append_Statement_to_slice(&result.tree.statements, stmt);
+            }
+        }
+    }
+
+    return result;
+}
+
+StandaloneParseResult parse_standalone_source_from_str(str s) {
+    Scanner scanner = init_scanner_from_str(s);
+    Parser parser   = {
+        .prefetched = false,
+        .scanner    = &scanner,
+    };
+    init_parser_buffer(&parser);
+    return parse_standalone(&parser);
 }
