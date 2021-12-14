@@ -101,8 +101,12 @@
 //
 // <ReturnStatement> = "return", [ <Expression> ], ";";
 
-const StandaloneSourceTree empty_standalone_source_text = {
+const StandaloneSourceTree empty_standalone_source_tree = {
     .functions  = EMPTY_SLICE,
+    .statements = EMPTY_SLICE,
+};
+
+const BlockStatement empty_block_statement = {
     .statements = EMPTY_SLICE,
 };
 

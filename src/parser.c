@@ -38,8 +38,8 @@ void step_back_parser(Parser *p) {
     p->prev_token       = p->backup_token;
 }
 
-void skip_comments(Parser *p) {
-    do {
+void parse_comments(Parser *p) {
+    do { // just skip them for now
         advance_parser(p);
     } while (p->token.type == tt_Comment);
 }
@@ -140,11 +140,52 @@ slice_of_Statements parse(Parser *p) {
     return s;
 }
 
-bool is_top_level_start(TokenType type) {
-    return type == tt_Function;
+void terminate_parser(Parser *p, char *error_text) {
+    fwrite(error_text, 1, strlen(error_text), stdout);
+    println();
+    print_token(p->token);
+    exit(1);
 }
 
-void parse_top_level(Parser *p) {}
+FunctionDeclaration parse_function_declaration(Parser *p) {
+    advance_parser(p); // skip "fn"
+    if (p->token.type != tt_Identifier) {
+        terminate_parser(p, "identifier expected");
+    }
+}
+
+BlockStatement parse_block_statement(Parser *p) {
+    BlockStatement block;
+    advance_parser(p); // skip "{"
+    advance_parser(p); // skip "}"
+    return block;
+}
+
+void parse_function_definition(Parser *p) {
+    FunctionDeclaration declaration = parse_function_declaration(p);
+    if (p->token.type != tt_LeftCurlyBracket) {
+        terminate_parser(p, "\"{\" expected");
+    }
+    BlockStatement body           = parse_block_statement(p);
+    FunctionDefinition definition = {
+        .declaration = declaration,
+        .body        = body,
+    };
+    append_FunctionDefinition_to_slice(&p->source_tree.functions, definition);
+}
+
+void parse_top_level(Parser *p) {
+    switch (p->token.type) {
+    case tt_Comment:
+        parse_comments(p);
+        break;
+    case tt_Function:
+        parse_function_definition(p);
+        break;
+    default:
+        parse_statement(p);
+    }
+}
 
 void init_parser_buffer(Parser *p) {
     for (u8 i = 0; i < parser_buffer_size; i++) {
@@ -156,19 +197,10 @@ StandaloneParseResult parse_standalone(Parser *p) {
     StandaloneParseResult result = {
         .ok = false,
     };
-    result.tree = empty_standalone_source_text;
+    result.tree = empty_standalone_source_tree;
 
     while (p->token.type != tt_EOF) {
-        if (p->token.type == tt_Comment) {
-            skip_comments(p);
-        } else if (is_toplevel_start(p->token.type)) {
-            parse_top_level(p);
-        } else {
-            Statement stmt = parse_statement(p);
-            if (stmt.type != st_Empty) {
-                append_Statement_to_slice(&result.tree.statements, stmt);
-            }
-        }
+        parse_top_level(p);
     }
 
     return result;
@@ -177,8 +209,9 @@ StandaloneParseResult parse_standalone(Parser *p) {
 StandaloneParseResult parse_standalone_source_from_str(str s) {
     Scanner scanner = init_scanner_from_str(s);
     Parser parser   = {
-        .prefetched = false,
-        .scanner    = &scanner,
+        .prefetched  = false,
+        .source_tree = empty_standalone_source_tree,
+        .scanner     = &scanner,
     };
     init_parser_buffer(&parser);
     return parse_standalone(&parser);

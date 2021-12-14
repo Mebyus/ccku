@@ -189,7 +189,8 @@ struct StandaloneSourceTree {
     slice_of_Statements statements;
 };
 
-extern const StandaloneSourceTree empty_standalone_source_text;
+extern const BlockStatement empty_block_statement;
+extern const StandaloneSourceTree empty_standalone_source_tree;
 
 Statement init_empty_statement();
 Statement init_define_statement(slice_of_Expressions left, slice_of_Expressions right);

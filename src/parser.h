@@ -25,6 +25,8 @@ struct Parser {
     Token next_token;
     Token prefetched_token;
 
+    StandaloneSourceTree source_tree;
+
     Scanner *scanner;
 };
 
