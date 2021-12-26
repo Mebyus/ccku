@@ -5,12 +5,19 @@
 #include "str.h"
 #include "types.h"
 
+#define empty_token                                                                                                    \
+    (Token) {                                                                                                          \
+        .type = tt_Empty,                                                                                              \
+    }
+
 typedef enum TokenType TokenType;
 typedef struct Token Token;
 typedef struct TokenLookupResult TokenLookupResult;
 typedef struct TokenParseResult TokenParseResult;
 
 enum TokenType {
+    tt_Empty, // for empty_token const, zero value of TokenType
+
     tt_begin_no_static_literal,
 
     tt_Illegal, // any byte sequence unknown to scanner

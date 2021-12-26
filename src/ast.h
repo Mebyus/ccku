@@ -23,6 +23,7 @@ typedef struct TupleResult TupleResult;
 typedef struct FunctionResult FunctionResult;
 typedef struct FunctionParameters FunctionParameters;
 typedef struct ParameterDeclaration ParameterDeclaration;
+typedef struct TypeName TypeName;
 typedef struct TypeSpecifier TypeSpecifier;
 typedef struct BlockStatement BlockStatement;
 typedef struct CallArgument CallArgument;
@@ -189,8 +190,12 @@ struct StandaloneSourceTree {
     slice_of_Statements statements;
 };
 
+extern const Identifier empty_identifier;
+extern const FunctionResult void_result;
 extern const BlockStatement empty_block_statement;
 extern const StandaloneSourceTree empty_standalone_source_tree;
+
+Identifier init_identifier(Token token);
 
 Statement init_empty_statement();
 Statement init_define_statement(slice_of_Expressions left, slice_of_Expressions right);
@@ -200,5 +205,8 @@ Expression init_identifier_expression(Token token);
 Expression init_integer_expression(Token token);
 Expression init_call_expression(Token name_token, slice_of_Expressions args);
 Expression init_string_expression(Token token);
+
+TypeSpecifier new_name_type_specifier(Token token);
+FunctionResult new_simple_result(TypeSpecifier type_specifier);
 
 #endif // KU_AST_H

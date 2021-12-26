@@ -9,6 +9,7 @@ const u8 token_type_format_width = 12;
 const u32 lookup_token_map_cap = 1 << 8;
 const byte *format_space_bytes = (byte *)"                    ";
 
+
 // These variables should be initialized through init_token_module() call
 map_str_u64 lookup_token_map = empty_map;
 u64 min_keyword_length       = UINT64_MAX;

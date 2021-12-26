@@ -23,7 +23,7 @@
 //
 // <ParameterList>  = <ParameterDeclaration> { "," <ParameterDeclaration> }
 //
-// <ParameterDeclaration>  = [ <IdentifierList> ] [ "..." ] <TypeSpecifier>
+// <ParameterDeclaration>  = [ <IdentifierList> ":" ] [ "..." ] <TypeSpecifier>
 //
 // <IdentifierList> = <Identifier> { "," <Identifier> }
 //
@@ -38,7 +38,7 @@
 // <QualifiedIdentifier> = <ModuleName> "." <Identifier>
 //
 // <TypeLiteral> = <ArrayTypeLiteral> | <PointerTypeLiteral> | <SliceTypeLiteral> | <MapTypeLiteral> |
-//                 <ChannelTypeLiteral>
+//                 <ChannelTypeLiteral> | <SetTypeLiteral>
 //
 // <ArrayTypeLiteral> = "[" <ArrayLengthSpecifier> "]" <ElementTypeSpecifier>
 //
@@ -101,6 +101,15 @@
 //
 // <ReturnStatement> = "return", [ <Expression> ], ";";
 
+const Identifier empty_identifier = {
+    .token = empty_token,
+};
+
+const FunctionResult void_result = {
+    .type = frt_Void,
+    .ptr  = nil,
+};
+
 const StandaloneSourceTree empty_standalone_source_tree = {
     .functions  = EMPTY_SLICE,
     .statements = EMPTY_SLICE,
@@ -109,6 +118,13 @@ const StandaloneSourceTree empty_standalone_source_tree = {
 const BlockStatement empty_block_statement = {
     .statements = EMPTY_SLICE,
 };
+
+Identifier init_identifier(Token token) {
+    Identifier identifier = {
+        .token = token,
+    };
+    return identifier;
+}
 
 Statement init_empty_statement() {
     Statement stmt = {
@@ -190,18 +206,45 @@ Expression init_string_expression(Token token) {
 }
 
 Expression init_call_expression(Token name_token, slice_of_Expressions args) {
-    CallExpression *cexpr = (CallExpression *)malloc(sizeof(CallExpression));
-    if (cexpr == nil) {
+    CallExpression *call_expression = (CallExpression *)malloc(sizeof(CallExpression));
+    if (call_expression == nil) {
         fatal(1, "not enough memory for new call expression");
     }
-    cexpr->function_name = take_str_from_str(&name_token.literal);
-    cexpr->args          = args;
+    call_expression->function_name = take_str_from_str(&name_token.literal);
+    call_expression->args          = args;
 
     Expression expr = {
         .type = et_Call,
-        .ptr  = cexpr,
+        .ptr  = call_expression,
     };
     return expr;
+}
+
+TypeSpecifier new_name_type_specifier(Token token) {
+    TypeName *type_name = (TypeName *)malloc(sizeof(TypeName));
+    if (type_name == nil) {
+        fatal(1, "not enough memory for new call expression");
+    }
+    type_name->name              = init_identifier(token);
+    type_name->module_name       = empty_identifier;
+    TypeSpecifier type_specifier = {
+        .type = tst_Name,
+        .ptr  = type_name,
+    };
+    return type_specifier;
+}
+
+FunctionResult new_simple_result(TypeSpecifier type_specifier) {
+    SimpleResult *simple_result = (SimpleResult *)malloc(sizeof(SimpleResult));
+    if (simple_result == nil) {
+        fatal(1, "not enough memory for new simple result");
+    }
+    simple_result->type_specifier  = type_specifier;
+    FunctionResult function_result = {
+        .type = frt_Simple,
+        .ptr  = simple_result,
+    };
+    return function_result;
 }
 
 IMPLEMENT_SLICE(Statement)

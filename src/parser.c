@@ -147,16 +147,96 @@ void terminate_parser(Parser *p, char *error_text) {
     exit(1);
 }
 
+TypeSpecifier parse_type_specifier(Parser *p) {
+    if (p->token.type != tt_Identifier) {
+        terminate_parser(p, "identifier expected");
+    }
+    TypeSpecifier type_specifier = new_name_type_specifier(p->token);
+    return type_specifier;
+}
+
+ParameterDeclaration parse_parameter_declaration(Parser *p) {
+    ParameterDeclaration declaration = {
+        .names = empty_slice_of_Identifiers,
+    };
+    while (true) {
+        Identifier identifier = init_identifier(p->token);
+        advance_parser(p); // consume parameter name
+        append_Identifier_to_slice(&declaration.names, identifier);
+        if (p->token.type == tt_Comma) {
+            advance_parser(p); // skip ","
+            if (p->token.type != tt_Identifier) {
+                terminate_parser(p, "identifier expected");
+            }
+        } else if (p->token.type == tt_Colon) {
+            advance_parser(p); // skip ":"
+            declaration.type_specifier = parse_type_specifier(p);
+            break;
+        } else {
+            terminate_parser(p, "unexpected token inside parameter declaration");
+        }
+    }
+    return declaration;
+}
+
+FunctionParameters parse_function_parameters(Parser *p) {
+    advance_parser(p); // skip "("
+    FunctionParameters params = {
+        .parameter_declarations = empty_slice_of_ParameterDeclarations,
+    };
+    while (p->token.type == tt_Identifier) {
+        append_ParameterDeclaration_to_slice(&params.parameter_declarations, parse_parameter_declaration(p));
+        if (p->token.type != tt_Comma) {
+            break;
+        }
+        advance_parser(p); // skip ","
+    }
+    if (p->token.type != tt_RightRoundBracket) {
+        terminate_parser(p, "\")\" expected");
+    }
+    advance_parser(p); // skip ")"
+    return params;
+}
+
+FunctionResult parse_function_result(Parser *p) {
+    if (p->token.type != tt_RightArrow) {
+        return void_result;
+    }
+    advance_parser(p); // skip "=>"
+    if (p->token.type != tt_LeftRoundBracket) {
+        return new_simple_result(parse_type_specifier(p));
+    }
+    FunctionParameters function_parameters = parse_function_parameters(p);
+    FunctionResult function_result = {
+        .type = frt_Tuple,
+    };
+}
+
 FunctionDeclaration parse_function_declaration(Parser *p) {
     advance_parser(p); // skip "fn"
     if (p->token.type != tt_Identifier) {
         terminate_parser(p, "identifier expected");
     }
+    FunctionDeclaration declaration = {
+        .name = init_identifier(p->token),
+    };
+    advance_parser(p); // consume function name
+    if (p->token.type != tt_LeftRoundBracket) {
+        terminate_parser(p, "\"(\" expected");
+    }
+    declaration.parameters = parse_function_parameters(p);
+    declaration.result     = parse_function_result(p);
+    return declaration;
 }
 
 BlockStatement parse_block_statement(Parser *p) {
-    BlockStatement block;
+    BlockStatement block = {
+        .statements = empty_slice_of_Statements,
+    };
     advance_parser(p); // skip "{"
+    if (p->token.type != tt_RightCurlyBracket) {
+        terminate_parser(p, "\"}\" expected");
+    }
     advance_parser(p); // skip "}"
     return block;
 }

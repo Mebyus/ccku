@@ -1,0 +1,11 @@
+fn add(a, b: i32) => (i32) {
+    return a + b
+}
+
+fn swap(a, b: i32) => (i32, i32) {
+    return b, a
+}
+
+fn check(a: str) => (ok: bool) {
+    return a != ""
+}
