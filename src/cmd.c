@@ -27,7 +27,7 @@ void execute_parse_cmd(char *path) {
     if (read_result.erc != 0) {
         fatal(read_result.erc, "error reading file");
     }
-    parse_source(read_result.source);
+    parse_standalone_source_from_str(read_result.source.text);
 }
 
 int main(int argc, char **argv) {

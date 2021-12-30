@@ -1,5 +1,13 @@
-fn add(a, b: i32) => (i32) {
+fn inc(x: i32) {
+    x++
+}
+
+fn add(a, b: i32) => i32 {
     return a + b
+}
+
+fn sub(a, b: i32) => (i32) {
+    return a - b
 }
 
 fn swap(a, b: i32) => (i32, i32) {
@@ -8,4 +16,8 @@ fn swap(a, b: i32) => (i32, i32) {
 
 fn check(a: str) => (ok: bool) {
     return a != ""
+}
+
+fn read_file(path: str) => (data: []byte, err: error) {
+    return
 }

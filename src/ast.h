@@ -11,6 +11,7 @@ typedef enum StatementType StatementType;
 typedef enum ExpressionType ExpressionType;
 typedef enum TypeSpecifierType TypeSpecifierType;
 typedef enum TypeLiteralType TypeLiteralType;
+
 typedef struct StandaloneSourceTree StandaloneSourceTree;
 typedef struct Statement Statement;
 typedef struct DefineStatement DefineStatement;
@@ -19,7 +20,8 @@ typedef struct CallExpression CallExpression;
 typedef struct FunctionDeclaration FunctionDeclaration;
 typedef struct FunctionDefinition FunctionDefinition;
 typedef struct SimpleResult SimpleResult;
-typedef struct TupleResult TupleResult;
+typedef struct TupleSignatureResult TupleSignatureResult;
+typedef struct TypedTupleResult TypedTupleResult;
 typedef struct FunctionResult FunctionResult;
 typedef struct FunctionParameters FunctionParameters;
 typedef struct ParameterDeclaration ParameterDeclaration;
@@ -33,15 +35,33 @@ typedef struct String String;
 
 TYPEDEF_SLICE(Identifier)
 TYPEDEF_SLICE(ParameterDeclaration)
+TYPEDEF_SLICE(TypeSpecifier)
 TYPEDEF_SLICE(Statement)
 TYPEDEF_SLICE(Expression)
 TYPEDEF_SLICE(CallArgument)
 TYPEDEF_SLICE(FunctionDefinition)
 
+// FunctionResultType determines type of struct behind pointer in FunctionResult struct
 enum FunctionResultType {
+    // Function returns no result
+    //
+    // Pointer is nil
     frt_Void,
+
+    // Function returns a single unnamed value
+    //
+    // Pointer contains SimpleResult struct
     frt_Simple,
-    frt_Tuple,
+
+    // Function returns several values, only types of these values are known
+    //
+    // Pointer contains TupleSignatureResult
+    frt_TupleSignature,
+
+    // Function returns several values, each value has a name
+    //
+    // Pointer contains TypedTupleResult
+    frt_TypedTuple,
 };
 
 enum StatementType {
@@ -66,8 +86,15 @@ enum ExpressionType {
     et_StringLiteral,
 };
 
+// TypeSpecifierType determines type of struct behind pointer in TypeSpecifier struct
 enum TypeSpecifierType {
+    // Type is specified by its name
     tst_Name,
+
+    // Type is specified by its qualified name
+    tst_QualifiedName,
+
+    // Type is specified by type literal
     tst_Literal,
 };
 
@@ -78,6 +105,8 @@ enum TypeLiteralType {
     tlt_Map,
     tlt_Set,
     tlt_Channel,
+    tlt_Struct,
+    tlt_Trait,
 };
 
 struct Identifier {
@@ -135,7 +164,11 @@ struct SimpleResult {
     TypeSpecifier type_specifier;
 };
 
-struct TupleResult {
+struct TupleSignatureResult {
+    slice_of_TypeSpecifiers type_specifiers;
+};
+
+struct TypedTupleResult {
     slice_of_ParameterDeclarations parameter_declarations;
 };
 
@@ -208,5 +241,7 @@ Expression init_string_expression(Token token);
 
 TypeSpecifier new_name_type_specifier(Token token);
 FunctionResult new_simple_result(TypeSpecifier type_specifier);
+FunctionResult new_typed_tuple_result(slice_of_ParameterDeclarations params);
+FunctionResult new_tuple_signature_result_from_identifiers(slice_of_Identifiers names);
 
 #endif // KU_AST_H

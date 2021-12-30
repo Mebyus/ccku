@@ -31,11 +31,11 @@ GENFLAGS = -fwrapv
 ifeq (${BUILD}, debug)
 	TARGET_BIN_DIR = ${BIN_DIR}/${DEBUG_DIR}
 	TARGET_OBJ_DIR = ${OBJ_DIR}/${DEBUG_DIR}
-	CFLAGS = ${GENFLAGS} ${WARNINGS} -Werror -std=c${CSTANDARD} -g
+	CFLAGS = ${GENFLAGS} ${WARNINGS} -Werror -pipe -std=c${CSTANDARD} -g
 else
 	TARGET_BIN_DIR = ${BIN_DIR}/${RELEASE_DIR}
 	TARGET_OBJ_DIR = ${OBJ_DIR}/${RELEASE_DIR}
-	CFLAGS = ${GENFLAGS} ${WARNINGS} -Werror -std=c${CSTANDARD} -O${OPTIMIZATION}
+	CFLAGS = ${GENFLAGS} ${WARNINGS} -Werror -pipe -std=c${CSTANDARD} -O${OPTIMIZATION}
 endif
 
 $(shell mkdir -p ${TARGET_BIN_DIR})

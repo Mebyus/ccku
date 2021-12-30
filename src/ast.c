@@ -1,4 +1,5 @@
 #include "ast.h"
+#include "new.h"
 
 // Language syntax in Backus-Naur extended form
 //
@@ -247,9 +248,33 @@ FunctionResult new_simple_result(TypeSpecifier type_specifier) {
     return function_result;
 }
 
+FunctionResult new_typed_tuple_result(slice_of_ParameterDeclarations params) {
+    TypedTupleResult *tuple_result       = xnew(TypedTupleResult);
+    tuple_result->parameter_declarations = params;
+    FunctionResult function_result       = {
+        .type = frt_TypedTuple,
+        .ptr  = tuple_result,
+    };
+    return function_result;
+}
+
+FunctionResult new_tuple_signature_result_from_identifiers(slice_of_Identifiers names) {
+    TupleSignatureResult *tuple_signature_result = xnew(TupleSignatureResult);
+    tuple_signature_result->type_specifiers      = empty_slice_of_TypeSpecifiers;
+    for (u32 i = 0; i < names.len; i++) {
+        append_TypeSpecifier_to_slice(&tuple_signature_result->type_specifiers, new_name_type_specifier(names.elem[i].token));
+    }
+    FunctionResult function_result = {
+        .type = frt_TupleSignature,
+        .ptr  = tuple_signature_result,
+    };
+    return function_result;
+}
+
 IMPLEMENT_SLICE(Statement)
 IMPLEMENT_SLICE(Expression)
 IMPLEMENT_SLICE(CallArgument)
 IMPLEMENT_SLICE(Identifier)
+IMPLEMENT_SLICE(TypeSpecifier)
 IMPLEMENT_SLICE(ParameterDeclaration)
 IMPLEMENT_SLICE(FunctionDefinition)

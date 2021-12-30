@@ -152,6 +152,7 @@ TypeSpecifier parse_type_specifier(Parser *p) {
         terminate_parser(p, "identifier expected");
     }
     TypeSpecifier type_specifier = new_name_type_specifier(p->token);
+    advance_parser(p); // consume type name
     return type_specifier;
 }
 
@@ -198,6 +199,48 @@ FunctionParameters parse_function_parameters(Parser *p) {
     return params;
 }
 
+FunctionResult parse_typed_tuple_function_result_from_colon(Parser *p, slice_of_Identifiers names) {
+
+}
+
+FunctionResult parse_tuple_signature_function_result(Parser *p, slice_of_Identifiers names) {
+
+}
+
+FunctionResult parse_tuple_function_result(Parser *p) {
+    advance_parser(p); // skip "("
+    slice_of_Identifiers names = empty_slice_of_Identifiers;
+    
+    while (p->token.type == tt_Identifier) {
+        append_Identifier_to_slice(&names, init_identifier(p->token));
+        advance_parser(p); // consume name
+        if (p->token.type != tt_Comma) {
+            break;
+        }
+        advance_parser(p); // skip ","
+    }
+
+    if (p->token.type == tt_RightRoundBracket) {
+        // result is a tuple signature
+
+        FunctionResult function_result = new_tuple_signature_result_from_identifiers(names);
+        free_slice_of_Identifiers(names);
+        return function_result;
+    }
+
+    if (p->token.type == tt_Colon) {
+        // result is a typed tuple
+
+        return parse_typed_tuple_function_result_from_colon(p, names);
+    }
+    FunctionResult function_result = parse_tuple_signature_function_result(p, names);
+    if (p->token.type != tt_RightRoundBracket) {
+        terminate_parser(p, "\")\" expected");
+    }
+    advance_parser(p); // skip ")"
+    return function_result;
+}
+
 FunctionResult parse_function_result(Parser *p) {
     if (p->token.type != tt_RightArrow) {
         return void_result;
@@ -206,10 +249,7 @@ FunctionResult parse_function_result(Parser *p) {
     if (p->token.type != tt_LeftRoundBracket) {
         return new_simple_result(parse_type_specifier(p));
     }
-    FunctionParameters function_parameters = parse_function_parameters(p);
-    FunctionResult function_result = {
-        .type = frt_Tuple,
-    };
+    return parse_tuple_function_result(p);
 }
 
 FunctionDeclaration parse_function_declaration(Parser *p) {
@@ -234,6 +274,9 @@ BlockStatement parse_block_statement(Parser *p) {
         .statements = empty_slice_of_Statements,
     };
     advance_parser(p); // skip "{"
+    while (p->token.type != tt_RightCurlyBracket && p->token.type != tt_EOF && p->token.type != tt_Illegal) {
+        append_Statement_to_slice(&block.statements, parse_statement(p));
+    }
     if (p->token.type != tt_RightCurlyBracket) {
         terminate_parser(p, "\"}\" expected");
     }
