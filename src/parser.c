@@ -200,17 +200,58 @@ FunctionParameters parse_function_parameters(Parser *p) {
 }
 
 FunctionResult parse_typed_tuple_function_result_from_colon(Parser *p, slice_of_Identifiers names) {
+    advance_parser(p); // skip ":"
+    slice_of_ParameterDeclarations parameter_declarations = empty_slice_of_ParameterDeclarations;
+    ParameterDeclaration first_parameter_declaration      = {
+        .names = names,
+    };
+    first_parameter_declaration.type_specifier = parse_type_specifier(p);
+    append_ParameterDeclaration_to_slice(&parameter_declarations, first_parameter_declaration);
 
+    if (p->token.type == tt_RightRoundBracket) {
+        advance_parser(p); // skip ")"
+        return new_typed_tuple_result(parameter_declarations);
+    } else if (p->token.type != tt_Comma) {
+        terminate_parser(p, "\")\" or \",\" expected");
+    }
+    advance_parser(p); // skip ","
+
+    while (p->token.type == tt_Identifier) {
+        append_ParameterDeclaration_to_slice(&parameter_declarations, parse_parameter_declaration(p));
+        if (p->token.type != tt_Comma) {
+            break;
+        }
+        advance_parser(p); // skip ","
+    }
+    if (p->token.type != tt_RightRoundBracket) {
+        terminate_parser(p, "\")\" expected");
+    }
+    advance_parser(p); // skip ")"
+    return new_typed_tuple_result(parameter_declarations);
 }
 
-FunctionResult parse_tuple_signature_function_result(Parser *p, slice_of_Identifiers names) {
-
+FunctionResult parse_tuple_signature_function_result_from_type_specifier(Parser *p, slice_of_Identifiers names) {
+    slice_of_TypeSpecifiers type_specifiers = new_type_specifiers_from_identifiers(names);
+    append_TypeSpecifier_to_slice(&type_specifiers, parse_type_specifier(p));
+    while (p->token.type == tt_Comma) {
+        advance_parser(p); // skip ","
+        if (p->token.type == tt_RightRoundBracket) {
+            advance_parser(p); // skip ")"
+            return new_tuple_signature_result(type_specifiers);
+        }
+        append_TypeSpecifier_to_slice(&type_specifiers, parse_type_specifier(p));
+    }
+    if (p->token.type != tt_RightRoundBracket) {
+        terminate_parser(p, "\")\" expected");
+    }
+    advance_parser(p); // skip ")"
+    return new_tuple_signature_result(type_specifiers);
 }
 
 FunctionResult parse_tuple_function_result(Parser *p) {
     advance_parser(p); // skip "("
     slice_of_Identifiers names = empty_slice_of_Identifiers;
-    
+
     while (p->token.type == tt_Identifier) {
         append_Identifier_to_slice(&names, init_identifier(p->token));
         advance_parser(p); // consume name
@@ -225,6 +266,7 @@ FunctionResult parse_tuple_function_result(Parser *p) {
 
         FunctionResult function_result = new_tuple_signature_result_from_identifiers(names);
         free_slice_of_Identifiers(names);
+        advance_parser(p); // skip ")"
         return function_result;
     }
 
@@ -233,11 +275,8 @@ FunctionResult parse_tuple_function_result(Parser *p) {
 
         return parse_typed_tuple_function_result_from_colon(p, names);
     }
-    FunctionResult function_result = parse_tuple_signature_function_result(p, names);
-    if (p->token.type != tt_RightRoundBracket) {
-        terminate_parser(p, "\")\" expected");
-    }
-    advance_parser(p); // skip ")"
+    FunctionResult function_result = parse_tuple_signature_function_result_from_type_specifier(p, names);
+    free_slice_of_Identifiers(names);
     return function_result;
 }
 

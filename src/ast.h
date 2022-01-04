@@ -229,6 +229,7 @@ extern const BlockStatement empty_block_statement;
 extern const StandaloneSourceTree empty_standalone_source_tree;
 
 Identifier init_identifier(Token token);
+slice_of_TypeSpecifiers new_type_specifiers_from_identifiers(slice_of_Identifiers names);
 
 Statement init_empty_statement();
 Statement init_define_statement(slice_of_Expressions left, slice_of_Expressions right);
@@ -243,5 +244,6 @@ TypeSpecifier new_name_type_specifier(Token token);
 FunctionResult new_simple_result(TypeSpecifier type_specifier);
 FunctionResult new_typed_tuple_result(slice_of_ParameterDeclarations params);
 FunctionResult new_tuple_signature_result_from_identifiers(slice_of_Identifiers names);
+FunctionResult new_tuple_signature_result(slice_of_TypeSpecifiers type_specifiers);
 
 #endif // KU_AST_H

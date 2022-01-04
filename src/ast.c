@@ -1,5 +1,5 @@
 #include "ast.h"
-#include "new.h"
+#include "xnew.h"
 
 // Language syntax in Backus-Naur extended form
 //
@@ -262,13 +262,32 @@ FunctionResult new_tuple_signature_result_from_identifiers(slice_of_Identifiers 
     TupleSignatureResult *tuple_signature_result = xnew(TupleSignatureResult);
     tuple_signature_result->type_specifiers      = empty_slice_of_TypeSpecifiers;
     for (u32 i = 0; i < names.len; i++) {
-        append_TypeSpecifier_to_slice(&tuple_signature_result->type_specifiers, new_name_type_specifier(names.elem[i].token));
+        append_TypeSpecifier_to_slice(
+            &tuple_signature_result->type_specifiers, new_name_type_specifier(names.elem[i].token));
     }
     FunctionResult function_result = {
         .type = frt_TupleSignature,
         .ptr  = tuple_signature_result,
     };
     return function_result;
+}
+
+FunctionResult new_tuple_signature_result(slice_of_TypeSpecifiers type_specifiers) {
+    TupleSignatureResult *tuple_signature_result = xnew(TupleSignatureResult);
+    tuple_signature_result->type_specifiers      = type_specifiers;
+    FunctionResult function_result               = {
+        .type = frt_TupleSignature,
+        .ptr  = tuple_signature_result,
+    };
+    return function_result;
+}
+
+slice_of_TypeSpecifiers new_type_specifiers_from_identifiers(slice_of_Identifiers names) {
+    slice_of_TypeSpecifiers type_specifiers = empty_slice_of_TypeSpecifiers;
+    for (u32 i = 0; i < names.len; i++) {
+        append_TypeSpecifier_to_slice(&type_specifiers, new_name_type_specifier(names.elem[i].token));
+    }
+    return type_specifiers;
 }
 
 IMPLEMENT_SLICE(Statement)

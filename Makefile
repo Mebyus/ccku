@@ -50,7 +50,7 @@ PATH_TEST_PATH = ${TARGET_BIN_DIR}/${PATH_TEST_NAME}
 ${BIN_PATH}: ${TARGET_OBJ_DIR}/cmd.o ${TARGET_OBJ_DIR}/source.o ${TARGET_OBJ_DIR}/scanner.o \
 ${TARGET_OBJ_DIR}/token.o ${TARGET_OBJ_DIR}/str.o ${TARGET_OBJ_DIR}/fatal.o ${TARGET_OBJ_DIR}/slice.o \
 ${TARGET_OBJ_DIR}/ast.o ${TARGET_OBJ_DIR}/parser.o ${TARGET_OBJ_DIR}/byte_reader.o ${TARGET_OBJ_DIR}/position.o \
-${TARGET_OBJ_DIR}/charset.o ${TARGET_OBJ_DIR}/map.o
+${TARGET_OBJ_DIR}/charset.o ${TARGET_OBJ_DIR}/map.o ${TARGET_OBJ_DIR}/xnew.o
 	${CC} -o $@ $^
 
 .PHONY: test
@@ -68,7 +68,8 @@ ${TARGET_OBJ_DIR}/path_test.o ${TARGET_OBJ_DIR}/path.o
 ${TEST_PATH}: ${TARGET_OBJ_DIR}/test.o ${TARGET_OBJ_DIR}/source.o ${TARGET_OBJ_DIR}/scanner.o \
 ${TARGET_OBJ_DIR}/token.o ${TARGET_OBJ_DIR}/str.o ${TARGET_OBJ_DIR}/slice.o ${TARGET_OBJ_DIR}/byte_reader.o \
 ${TARGET_OBJ_DIR}/position.o ${TARGET_OBJ_DIR}/charset.o ${TARGET_OBJ_DIR}/fatal.o \
-${TARGET_OBJ_DIR}/split_test_scanner.o ${TARGET_OBJ_DIR}/map.o ${TARGET_OBJ_DIR}/strop.o
+${TARGET_OBJ_DIR}/split_test_scanner.o ${TARGET_OBJ_DIR}/map.o ${TARGET_OBJ_DIR}/strop.o \
+${TARGET_OBJ_DIR}/xnew.o
 	${CC} -o $@ $^
 
 ${TARGET_OBJ_DIR}/cmd.o: ${SRC_DIR}/cmd.c
@@ -142,6 +143,10 @@ ${TARGET_OBJ_DIR}/map.o: ${SRC_DIR}/map.c
 ${TARGET_OBJ_DIR}/strop.o: ${SRC_DIR}/strop.c
 	${CC} ${CPPFLAGS} ${DEP_DIR}/strop.d ${CFLAGS} -o $@ -c $<
 -include ${DEP_DIR}/strop.d
+
+${TARGET_OBJ_DIR}/xnew.o: ${SRC_DIR}/xnew.c
+	${CC} ${CPPFLAGS} ${DEP_DIR}/xnew.d ${CFLAGS} -o $@ -c $<
+-include ${DEP_DIR}/xnew.d
 
 ${TARGET_OBJ_DIR}/split_test_scanner.o: ${SRC_DIR}/split_test_scanner.c
 	${CC} ${CPPFLAGS} ${DEP_DIR}/split_test_scanner.d ${CFLAGS} -o $@ -c $<

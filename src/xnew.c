@@ -1,4 +1,4 @@
-#include "new.h"
+#include "xnew.h"
 #include "fatal.h"
 #include "types.h"
 
