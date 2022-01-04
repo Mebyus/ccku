@@ -224,6 +224,7 @@ struct StandaloneSourceTree {
 };
 
 extern const Identifier empty_identifier;
+extern const TypeSpecifier empty_type_specifier;
 extern const FunctionResult void_result;
 extern const BlockStatement empty_block_statement;
 extern const StandaloneSourceTree empty_standalone_source_tree;

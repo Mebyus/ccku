@@ -17,6 +17,7 @@ u64 max_keyword_length       = 0;
 
 str token_type_strings[] = {
     // Non static or empty literals
+    [tt_Empty]              = STR("EMPTY"),
     [tt_Illegal]            = STR("ILLEGAL"),
     [tt_Comment]            = STR("COMMENT"),
     [tt_EOF]                = STR("EOF"),
@@ -176,6 +177,7 @@ void init_token_lookup_map() {
     for (u64 type = tt_begin_keyword + 1; type < tt_end_keyword; type++) {
         put_map_str_u64(&lookup_token_map, token_type_strings[type], type);
     }
+    put_map_str_u64(&lookup_token_map, token_type_strings[tt_Empty], tt_Empty);
     put_map_str_u64(&lookup_token_map, token_type_strings[tt_Terminator], tt_Terminator);
     put_map_str_u64(&lookup_token_map, token_type_strings[tt_EOF], tt_EOF);
 }

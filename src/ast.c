@@ -106,6 +106,10 @@ const Identifier empty_identifier = {
     .token = empty_token,
 };
 
+const TypeSpecifier empty_type_specifier = {
+    .ptr = nil,
+};
+
 const FunctionResult void_result = {
     .type = frt_Void,
     .ptr  = nil,

@@ -7,6 +7,8 @@
 
 const u8 parser_buffer_size = 2;
 
+TypeSpecifier parse_type_specifier(Parser *p);
+
 Token get_next_token(Parser *p) {
     Token token;
     if (p->prefetched) {
@@ -147,13 +149,40 @@ void terminate_parser(Parser *p, char *error_text) {
     exit(1);
 }
 
-TypeSpecifier parse_type_specifier(Parser *p) {
-    if (p->token.type != tt_Identifier) {
-        terminate_parser(p, "identifier expected");
+TypeSpecifier parse_indexed_type_specifier(Parser *p) {
+    advance_parser(p); // skip "["
+    if (p->token.type != tt_RightSquareBracket) {
+        terminate_parser(p, "\"]\" expected");
     }
+    advance_parser(p); // skip "]"
+    return parse_type_specifier(p);
+}
+
+TypeSpecifier parse_name_type_specifier(Parser *p) {
     TypeSpecifier type_specifier = new_name_type_specifier(p->token);
     advance_parser(p); // consume type name
     return type_specifier;
+}
+
+TypeSpecifier parse_type_specifier(Parser *p) {
+    switch (p->token.type) {
+    case tt_Identifier:
+        return parse_name_type_specifier(p);
+    case tt_Asterisk:
+        terminate_parser(p, "pointer type specifiers are not implemented");
+        break;
+    case tt_LeftSquareBracket:
+        return parse_indexed_type_specifier(p);
+    case tt_Struct:
+        terminate_parser(p, "struct type specifiers are not implemented");
+        break;
+    case tt_Channel:
+        terminate_parser(p, "channel type specifiers are not implemented");
+        break;
+    default:
+        terminate_parser(p, "unexpected token inside type specifier");
+    }
+    return empty_type_specifier; // non-reachable statement, avoids compiler warning
 }
 
 ParameterDeclaration parse_parameter_declaration(Parser *p) {
