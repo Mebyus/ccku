@@ -247,4 +247,6 @@ FunctionResult new_typed_tuple_result(slice_of_ParameterDeclarations params);
 FunctionResult new_tuple_signature_result_from_identifiers(slice_of_Identifiers names);
 FunctionResult new_tuple_signature_result(slice_of_TypeSpecifiers type_specifiers);
 
+void print_standalone_source_tree(StandaloneSourceTree tree);
+
 #endif // KU_AST_H

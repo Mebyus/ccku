@@ -124,6 +124,13 @@ const BlockStatement empty_block_statement = {
     .statements = EMPTY_SLICE,
 };
 
+const str function_display_title = STR("fn: ");
+const str params_display_title   = STR("params: ");
+const str result_display_title   = STR("result: ");
+const str void_display_title     = STR("void");
+
+const u8 display_indentation = 2;
+
 Identifier init_identifier(Token token) {
     Identifier identifier = {
         .token = token,
@@ -292,6 +299,53 @@ slice_of_TypeSpecifiers new_type_specifiers_from_identifiers(slice_of_Identifier
         append_TypeSpecifier_to_slice(&type_specifiers, new_name_type_specifier(names.elem[i].token));
     }
     return type_specifiers;
+}
+
+void print_parameter_declaration(u8 spaces, ParameterDeclaration decl) {
+    u8 indent = (u8)(spaces + display_indentation);
+    for (u32 i = 0; i < decl.names.len; i++) {
+        print_indent_str(indent, decl.names.elem[i].token.literal);
+        println();
+    }
+}
+
+void print_function_parameters(FunctionParameters params) {
+    print_indent_str(display_indentation, params_display_title);
+    if (params.parameter_declarations.len == 0) {
+        print_str(void_display_title);
+    } else {
+        println();
+        for (u32 i = 0; i < params.parameter_declarations.len; i++) {
+            print_parameter_declaration(display_indentation, params.parameter_declarations.elem[i]);
+        }
+    }
+    println();
+}
+
+void print_function_result(FunctionResult result) {
+    print_indent_str(display_indentation, result_display_title);
+    if (result.type == frt_Void) {
+        print_str(void_display_title);
+    }
+    println();
+}
+
+void print_function_name(Identifier name) {
+    print_str(function_display_title);
+    println_str(name.token.literal);
+}
+
+void print_function_definition(FunctionDefinition def) {
+    print_function_name(def.declaration.name);
+    print_function_parameters(def.declaration.parameters);
+    print_function_result(def.declaration.result);
+    println();
+}
+
+void print_standalone_source_tree(StandaloneSourceTree tree) {
+    for (u32 i = 0; i < tree.functions.len; i++) {
+        print_function_definition(tree.functions.elem[i]);
+    }
 }
 
 IMPLEMENT_SLICE(Statement)

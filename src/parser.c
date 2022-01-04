@@ -2,7 +2,7 @@
 
 #include "parser.h"
 
-#define ENABLE_DEBUG 1
+#define ENABLE_DEBUG 0
 #include "debug.h"
 
 const u8 parser_buffer_size = 2;
@@ -393,7 +393,7 @@ StandaloneParseResult parse_standalone(Parser *p) {
     while (p->token.type != tt_EOF) {
         parse_top_level(p);
     }
-
+    print_standalone_source_tree(p->source_tree);
     return result;
 }
 

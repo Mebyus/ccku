@@ -7,7 +7,6 @@ const u8 position_format_width   = 12;
 const u8 token_type_format_width = 12;
 
 const u32 lookup_token_map_cap = 1 << 8;
-const byte *format_space_bytes = (byte *)"                    ";
 
 
 // These variables should be initialized through init_token_module() call
@@ -279,12 +278,10 @@ void print_token(Token token) {
     fwrite(":", 1, 1, stdout);
     print_str(column_str);
     u64 spaces = (u64)position_format_width - 1 - line_str.len - column_str.len;
-    fwrite(format_space_bytes, 1, spaces, stdout);
-    print_str(type_str);
+    print_indent_str((u8)spaces, type_str);
     if (!has_static_literal(token.type)) {
         spaces = (u64)token_type_format_width - type_str.len;
-        fwrite(format_space_bytes, 1, spaces, stdout);
-        print_str(token.literal);
+        print_indent_str((u8)spaces, token.literal);
     }
     println();
 

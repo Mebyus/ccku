@@ -24,6 +24,15 @@ const byte small_decimals_string[200] = "00010203040506070809"
                                         "80818283848586878889"
                                         "90919293949596979899";
 
+const byte format_space_bytes[] = "                                "
+                                  "                                "
+                                  "                                "
+                                  "                                "
+                                  "                                "
+                                  "                                "
+                                  "                                "
+                                  "                                ";
+
 const str empty_str = {.origin = nil, .bytes = nil, .len = 0};
 
 bool is_empty_str(str s) {
@@ -362,6 +371,11 @@ void print_str(str s) {
         return;
     }
     fwrite(s.bytes, 1, s.len, stdout);
+}
+
+void print_indent_str(u8 spaces, str s) {
+    fwrite(format_space_bytes, 1, spaces, stdout);
+    print_str(s);
 }
 
 void println_str(str s) {
