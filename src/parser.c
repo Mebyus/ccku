@@ -155,7 +155,7 @@ TypeSpecifier parse_indexed_type_specifier(Parser *p) {
         terminate_parser(p, "\"]\" expected");
     }
     advance_parser(p); // skip "]"
-    return parse_type_specifier(p);
+    return new_slice_type_specifier(parse_type_specifier(p));
 }
 
 TypeSpecifier parse_name_type_specifier(Parser *p) {

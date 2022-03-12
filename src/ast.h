@@ -22,6 +22,8 @@ typedef struct FunctionDefinition FunctionDefinition;
 typedef struct SimpleResult SimpleResult;
 typedef struct TupleSignatureResult TupleSignatureResult;
 typedef struct TypedTupleResult TypedTupleResult;
+typedef struct SliceTypeLiteral SliceTypeLiteral;
+typedef struct TypeLiteral TypeLiteral;
 typedef struct FunctionResult FunctionResult;
 typedef struct FunctionParameters FunctionParameters;
 typedef struct ParameterDeclaration ParameterDeclaration;
@@ -246,6 +248,7 @@ FunctionResult new_simple_result(TypeSpecifier type_specifier);
 FunctionResult new_typed_tuple_result(slice_of_ParameterDeclarations params);
 FunctionResult new_tuple_signature_result_from_identifiers(slice_of_Identifiers names);
 FunctionResult new_tuple_signature_result(slice_of_TypeSpecifiers type_specifiers);
+TypeSpecifier new_slice_type_specifier(TypeSpecifier element_type_specifier);
 
 void print_standalone_source_tree(StandaloneSourceTree tree);
 

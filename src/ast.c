@@ -263,8 +263,8 @@ FunctionResult new_typed_tuple_result(slice_of_ParameterDeclarations params) {
     TypedTupleResult *tuple_result       = xnew(TypedTupleResult);
     tuple_result->parameter_declarations = params;
     FunctionResult function_result       = {
-        .type = frt_TypedTuple,
-        .ptr  = tuple_result,
+              .type = frt_TypedTuple,
+              .ptr  = tuple_result,
     };
     return function_result;
 }
@@ -287,10 +287,23 @@ FunctionResult new_tuple_signature_result(slice_of_TypeSpecifiers type_specifier
     TupleSignatureResult *tuple_signature_result = xnew(TupleSignatureResult);
     tuple_signature_result->type_specifiers      = type_specifiers;
     FunctionResult function_result               = {
-        .type = frt_TupleSignature,
-        .ptr  = tuple_signature_result,
+                      .type = frt_TupleSignature,
+                      .ptr  = tuple_signature_result,
     };
     return function_result;
+}
+
+TypeSpecifier new_slice_type_specifier(TypeSpecifier element_type_specifier) {
+    SliceTypeLiteral *slice_type_literal = xnew(SliceTypeLiteral);
+    slice_type_literal->element_type     = element_type_specifier;
+    TypeLiteral *type_literal            = xnew(TypeLiteral);
+    type_literal->type                   = tlt_Slice;
+    type_literal->ptr                    = slice_type_literal;
+    TypeSpecifier type_specifier         = {
+                .type = tst_Literal,
+                .ptr  = type_literal,
+    };
+    return type_specifier;
 }
 
 slice_of_TypeSpecifiers new_type_specifiers_from_identifiers(slice_of_Identifiers names) {
@@ -301,10 +314,45 @@ slice_of_TypeSpecifiers new_type_specifiers_from_identifiers(slice_of_Identifier
     return type_specifiers;
 }
 
+void print_type_name(TypeName type_name) {
+    print_indent_str(1, type_name.name.token.literal);
+}
+
+void print_type_qualified_name(TypeName type_name) {
+    print_indent_str(1, type_name.name.token.literal);
+    print_str(type_name.module_name.token.literal);
+}
+
+void print_type_literal(TypeLiteral type_literal) {
+    switch (type_literal.type) {
+    case tlt_Slice:
+        break;
+    default:
+        break;
+    }
+}
+
+void print_type_specifier(TypeSpecifier type_specifier) {
+    switch (type_specifier.type) {
+    case tst_Name:
+        print_type_name(*(TypeName *)type_specifier.ptr);
+        break;
+    case tst_QualifiedName:
+        print_type_name(*(TypeName *)type_specifier.ptr);
+        break;
+    case tst_Literal:
+        print_type_literal(*(TypeLiteral *)type_specifier.ptr);
+        break;
+    default:
+        break;
+    }
+}
+
 void print_parameter_declaration(u8 spaces, ParameterDeclaration decl) {
     u8 indent = (u8)(spaces + display_indentation);
     for (u32 i = 0; i < decl.names.len; i++) {
         print_indent_str(indent, decl.names.elem[i].token.literal);
+        print_type_specifier(decl.type_specifier);
         println();
     }
 }
